@@ -86,7 +86,7 @@ export default function PWAInstallModal({ isOpen, onClose, isIOS, onInstall }: P
                   </div>
                   <div>
                     <p className="text-gray-800 font-medium">Tap the Share button</p>
-                    <p className="text-gray-600 text-sm">Look for the <Share className="inline h-4 w-4 mx-1" /> icon in Safari's toolbar</p>
+                    <p className="text-gray-600 text-sm">Look for the <Share className="inline h-4 w-4 mx-1" /> icon in Safari&apos;s toolbar</p>
                   </div>
                 </div>
 
@@ -95,8 +95,8 @@ export default function PWAInstallModal({ isOpen, onClose, isIOS, onInstall }: P
                     2
                   </div>
                   <div>
-                    <p className="text-gray-800 font-medium">Select "Add to Home Screen"</p>
-                    <p className="text-gray-600 text-sm">Scroll down and tap <Plus className="inline h-4 w-4 mx-1" /> "Add to Home Screen"</p>
+                    <p className="text-gray-800 font-medium">Select &quot;Add to Home Screen&quot;</p>
+                    <p className="text-gray-600 text-sm">Scroll down and tap <Plus className="inline h-4 w-4 mx-1" /> &quot;Add to Home Screen&quot;</p>
                   </div>
                 </div>
 
@@ -105,8 +105,8 @@ export default function PWAInstallModal({ isOpen, onClose, isIOS, onInstall }: P
                     3
                   </div>
                   <div>
-                    <p className="text-gray-800 font-medium">Tap "Add"</p>
-                    <p className="text-gray-600 text-sm">Confirm by tapping "Add" in the top right</p>
+                    <p className="text-gray-800 font-medium">Tap &quot;Add&quot;</p>
+                    <p className="text-gray-600 text-sm">Confirm by tapping &quot;Add&quot; in the top right</p>
                   </div>
                 </div>
               </div>

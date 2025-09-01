@@ -383,6 +383,8 @@ export default function DashboardPage() {
           {activeTab === 'membership' && (
             <Membership
               items={membershipItems}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
               showAddForm={showAddForm}
               onShowAddForm={setShowAddForm}
               onAddItem={handleAddMembershipItem}
