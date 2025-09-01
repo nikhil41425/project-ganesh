@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+  
+  /* Ensure input text is visible in dark mode */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="search"],
+  textarea {
+    color: #1f2937; /* Keep dark text even in dark mode for light input backgrounds */
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* PWA-specific styles */
+@media (display-mode: standalone) {
+  body {
+    /* Add padding for desktop PWA */
+    padding-top: env(titlebar-area-height, 0);
+  }
+}
+
+@media (display-mode: window-controls-overlay) {
+  body.window-controls-overlay {
+    /* Adjust for window controls overlay on desktop */
+    padding-top: env(titlebar-area-height, 32px);
+  }
+  
+  .titlebar-area {
+    position: fixed;
+    top: 0;
+    left: env(titlebar-area-x, 0);
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 32px);
+    background: var(--background);
+    z-index: 1000;
+    -webkit-app-region: drag;
+  }
+}
+
+/* Mobile-specific PWA styles */
+@media (max-width: 768px) {
+  /* Adjust for mobile safe areas */
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Desktop-specific PWA styles */
+@media (min-width: 1024px) {
+  /* Desktop PWA window styling */
+  @media (display-mode: standalone) {
+    body {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  }
+}
+
+/* Prevent text selection in desktop PWA controls */
+.titlebar-area,
+.window-controls {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Custom scrollbar for desktop PWA */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Focus styles for keyboard navigation (desktop) */
+@media (min-width: 768px) {
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Force input text color to be visible */
+  .input-visible {
+    color: #1f2937 !important; /* gray-800 */
+    background-color: #ffffff !important; /* white background */
+  }
+  
+  .input-visible::placeholder {
+    color: #6b7280 !important; /* gray-500 */
+  }
+  
+  .input-visible:focus {
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+  }
+}
+
+/* Mobile-specific improvements */
+@layer base {
+  /* Improve touch targets for mobile */
+  button {
+    min-height: 44px;
+  }
+  
+  /* Better mobile scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    textarea {
+      font-size: 16px;
+    }
+  }
+  
+  /* Ensure input text is always visible with proper color */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="search"],
+  textarea {
+    color: #1f2937 !important; /* gray-800 for good contrast - force with !important */
+    background-color: #ffffff !important; /* Ensure white background */
+  }
+  
+  /* Dark text for input placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    color: #6b7280 !important; /* gray-500 - force with !important */
+  }
+  
+  /* Additional focus state to ensure visibility */
+  input:focus,
+  textarea:focus {
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+  }
+}
+
+/* Custom mobile responsive utilities */
+@layer utilities {
+  .safe-area-inset {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Ensure SVG icons are visible */
+  svg {
+    display: block !important;
+    fill: currentColor !important;
+  }
+  
+  /* Ensure Lucide icons specifically are visible */
+  .lucide {
+    display: block !important;
+    stroke: currentColor !important;
+    fill: none !important;
+  }
+}
+
+/* Custom scrollbar styles for better horizontal scrolling */
+@layer utilities {
+  /* Webkit scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 6px;
+    border: 1px solid #6b7280;
+  }
+  
+  .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+  
+  .hover\:scrollbar-thumb-gray-400:hover::-webkit-scrollbar-thumb {
+    background: #6b7280;
+  }
+  
+  .scrollbar-track-gray-100::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  /* Firefox scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: auto;
+    scrollbar-color: #9ca3af #f3f4f6;
+  }
+
+  /* Force scrollbar to always be visible */
+  .scrollbar-always {
+    overflow: auto;
+    scrollbar-width: auto;
+  }
+
+  .scrollbar-always::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Enhanced table scrolling */
+  .table-scroll-container {
+    /* Add subtle scroll indicators */
+    background:
+      /* Shadow on left */
+      linear-gradient(90deg, rgba(0,0,0,0.1) 0%, transparent 3px),
+      /* Shadow on right */
+      linear-gradient(270deg, rgba(0,0,0,0.1) 0%, transparent 3px),
+      /* Main content */
+      white;
+    background-attachment: local, local, scroll;
+    background-repeat: no-repeat;
+    background-size: 3px 100%, 3px 100%, 100% 100%;
+    background-position: 0 0, 100% 0, 0 0;
+  }
+}
