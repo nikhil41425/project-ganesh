@@ -4,17 +4,70 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Analytics from '@/components/Analytics'
-import type { 
-  AuctionItem, 
-  MembershipItem, 
-  SpentItem, 
-  DonationItem, 
-  DuesItem,
-  TabType 
-} from '@/types'
-import { TABS } from '@/utils/constants'
 
-export default function DashboardPage() {
+// Define types for data items
+interface AuctionItem {
+  id: string
+  name: string
+  item: string
+  amount: number
+  paid: number
+  due: number
+  comment: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+interface MembershipItem {
+  id: string
+  name: string
+  amount: number
+  due: number
+  comment: string
+  paid: number
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+interface SpentItem {
+  id: string
+  item: string
+  amount: number
+  paid: number
+  due: number
+  comment: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+interface DonationItem {
+  id: string
+  name: string
+  amount: number
+  paid: number
+  due: number
+  comment: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+interface DuesItem {
+  id: string
+  name: string
+  amount: number
+  paid: number
+  due: number
+  comment: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
+
+export default function AnalyticsPage() {
   const [user, setUser] = useState<any>(null)
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
@@ -154,7 +207,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Analytics Dashboard</h1>
       
       <Analytics
         auctionItems={auctionItems}

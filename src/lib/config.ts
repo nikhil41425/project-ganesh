@@ -13,10 +13,10 @@ interface AppConfig {
  * Global application configuration
  * Set disableEdit to true to HIDE edit functionality
  * Set disableDelete to true to HIDE delete functionality
- * across all components (Auction, Expenses, Membership)
+ * across all componenssts (Auction, Expenses, Membership)
  */
 export const appConfig: AppConfig = {
-  disableEdit: true,   // Set to true to HIDE edit buttons
+  disableEdit: false,   // Set to true to HIDE edit buttons
   disableDelete: false // Set to true to HIDE delete buttons
 }
 

@@ -164,11 +164,12 @@ export default function Auction({
       </div>
 
       {/* Header with Search and Add Button */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-          Auction Items
-        </h2>
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+      <div className="bg-gradient-to-r from-white-50 to-white-50 rounded-lg p-4 border border-white-100">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Auction Items
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <input
@@ -186,6 +187,7 @@ export default function Auction({
             <Plus size={16} />
             Add Item
           </button>
+          </div>
         </div>
       </div>
 
@@ -272,14 +274,14 @@ export default function Auction({
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] border-r border-gray-200">Due</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Comment</th>
                   <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Created</th>
-                  {/* <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Updated</th> */}
+                  <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Updated</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white/60 backdrop-blur-sm divide-y divide-gray-200/30">
                 {items.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-gray-500 text-sm">
+                    <td colSpan={10} className="px-4 py-12 text-center text-gray-500 text-sm">
                       <div className="flex flex-col items-center space-y-3">
                         <div className="p-4 bg-gray-100 rounded-full">
                           <Plus size={24} className="text-gray-400" />
@@ -362,9 +364,9 @@ export default function Auction({
                         <td className="px-2 py-4 text-sm text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.created_at)}</div>
                         </td>
-                        {/* <td className="px-2 py-4 text-sm text-gray-400 border-r border-gray-200">
+                        <td className="px-2 py-4 text-sm text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.updated_at)}</div>
-                        </td> */}
+                        </td>
                         <td className="px-3 py-4 text-sm font-medium">
                           <div className="flex gap-2">
                             {isEditing ? (
@@ -441,7 +443,7 @@ export default function Auction({
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px] border-r border-gray-200">Due</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] border-r border-gray-200">Comment</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px] border-r border-gray-200">Created</th>
-                    {/* <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px] border-r border-gray-200">Updated</th> */}
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px] border-r border-gray-200">Updated</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">Actions</th>
                   </tr>
                 </thead>
@@ -520,11 +522,11 @@ export default function Auction({
                         <td className="px-2 py-3 text-xs text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.created_at)}</div>
                         </td>
-                        {/* <td className="px-2 py-3 text-xs text-gray-400 border-r border-gray-200">
+                        <td className="px-2 py-3 text-xs text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.updated_at)}</div>
-                        </td> */}
+                        </td>
                         <td className="px-2 py-3 text-sm font-medium">
-                          <div className="flex gap-1">
+                          <div className="flex gap-2">
                             {isEditing ? (
                               <>
                                 <button

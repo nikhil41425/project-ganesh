@@ -107,6 +107,17 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-gray-700 font-medium">Creating your account...</p>
+            <p className="text-sm text-gray-500">Please wait</p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
@@ -181,9 +192,12 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center space-x-2"
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
           </button>
         </form>
 

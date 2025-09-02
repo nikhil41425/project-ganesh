@@ -1,7 +1,19 @@
 import Link from "next/link";
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient()
+  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // If user is authenticated, redirect to dashboard
+  if (user) {
+    redirect('/dashboard')
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
