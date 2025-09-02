@@ -19,6 +19,20 @@ interface ExportData {
 export const exportAnalyticsToPDF = async (data: ExportData) => {
   const pdf = new jsPDF('p', 'mm', 'a4')
   
+  // Color palette for professional look
+  const colors = {
+    primary: [41, 98, 255] as [number, number, number],      // Blue
+    secondary: [76, 175, 80] as [number, number, number],    // Green
+    accent: [255, 152, 0] as [number, number, number],       // Orange
+    danger: [244, 67, 54] as [number, number, number],       // Red
+    dark: [33, 37, 41] as [number, number, number],          // Dark gray
+    light: [248, 249, 250] as [number, number, number],      // Light gray
+    white: [255, 255, 255] as [number, number, number],      // White
+    border: [220, 220, 220] as [number, number, number],     // Light border
+    headerBg: [248, 249, 250] as [number, number, number],   // Header background
+    alternateRow: [252, 252, 252] as [number, number, number] // Alternate row color
+  }
+  
   // Helper function to safely convert to number
   const safeNumber = (value: any): number => {
     if (value === null || value === undefined || value === '') return 0
@@ -46,7 +60,7 @@ export const exportAnalyticsToPDF = async (data: ExportData) => {
   // Page settings
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
-  const margin = 20
+  const margin = 15
   let currentY = margin
 
   // Function to add a new page if needed
@@ -61,19 +75,37 @@ export const exportAnalyticsToPDF = async (data: ExportData) => {
 
   // Function to add header to each page
   const addHeader = () => {
-    pdf.setFontSize(16)
+    // Header background
+    pdf.setFillColor(...colors.headerBg)
+    pdf.rect(0, 0, pageWidth, 25, 'F')
+    
+    // Main title with enhanced typography
+    pdf.setFontSize(20)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Friendz Youth - Analytics Report', pageWidth / 2, currentY, { align: 'center' })
-    currentY += 10
+    pdf.setTextColor(...colors.primary)
+    pdf.text('Friendz Youth', pageWidth / 2, 12, { align: 'center' })
     
-    pdf.setFontSize(10)
+    pdf.setFontSize(14)
+    pdf.setTextColor(...colors.dark)
+    pdf.text('Analytics Report', pageWidth / 2, 18, { align: 'center' })
+    
+    currentY = 30
+    
+    // Date and time info with better styling
+    pdf.setFontSize(9)
     pdf.setFont('helvetica', 'normal')
-    pdf.text(`Generated on: ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}`, pageWidth / 2, currentY, { align: 'center' })
-    currentY += 15
+    pdf.setTextColor(...colors.dark)
+    const reportDate = `Generated on: ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}`
+    pdf.text(reportDate, pageWidth / 2, currentY, { align: 'center' })
+    currentY += 8
     
-    // Add line separator
+    // Decorative line with color
+    pdf.setDrawColor(...colors.primary)
+    pdf.setLineWidth(0.5)
     pdf.line(margin, currentY, pageWidth - margin, currentY)
-    currentY += 10
+    pdf.setDrawColor(0, 0, 0) // Reset to black
+    pdf.setLineWidth(0.2) // Reset line width
+    currentY += 12
   }
 
   // Add header to first page
@@ -125,108 +157,201 @@ export const exportAnalyticsToPDF = async (data: ExportData) => {
     totalItems: categoryTotals.reduce((sum, cat) => sum + cat.count, 0)
   }
 
-  // Add Summary Section
+  // Add Summary Section with enhanced styling
+  pdf.setFontSize(16)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setTextColor(...colors.primary)
+  pdf.text('EXECUTIVE SUMMARY', margin, currentY)
+  currentY += 12
+
+  // Summary cards background
+  const cardHeight = 50
+  pdf.setFillColor(...colors.light)
+  pdf.roundedRect(margin, currentY, pageWidth - 2 * margin, cardHeight, 3, 3, 'F')
+  
+  // Summary statistics with better layout
+  pdf.setFontSize(11)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setTextColor(...colors.dark)
+  
+  const summaryY = currentY + 8
+  const col1X = margin + 10
+  const col2X = margin + (pageWidth - 2 * margin) / 2 + 10
+  
+  // Left column
+  pdf.text('Total Amount:', col1X, summaryY)
+  pdf.setTextColor(...colors.secondary)
+  pdf.text(formatCurrency(overallStats.totalAmount), col1X, summaryY + 8)
+  
+  pdf.setTextColor(...colors.dark)
+  pdf.text('Total Paid:', col1X, summaryY + 20)
+  pdf.setTextColor(...colors.secondary)
+  pdf.text(formatCurrency(overallStats.totalPaid), col1X, summaryY + 28)
+  
+  // Right column
+  pdf.setTextColor(...colors.dark)
+  pdf.text('Total Due:', col2X, summaryY)
+  pdf.setTextColor(...colors.danger)
+  pdf.text(formatCurrency(overallStats.totalDue), col2X, summaryY + 8)
+  
+  pdf.setTextColor(...colors.dark)
+  pdf.text('Total Items:', col2X, summaryY + 20)
+  pdf.setTextColor(...colors.accent)
+  pdf.text(overallStats.totalItems.toString(), col2X, summaryY + 28)
+
+  currentY += cardHeight + 15
+
+  // Category breakdown with enhanced table design
   pdf.setFontSize(14)
   pdf.setFont('helvetica', 'bold')
-  pdf.text('EXECUTIVE SUMMARY', margin, currentY)
-  currentY += 10
-
-  pdf.setFontSize(10)
-  pdf.setFont('helvetica', 'normal')
-  
-  // Overall statistics
-  const summaryData = [
-    ['Total Amount:', formatCurrency(overallStats.totalAmount)],
-    ['Total Paid:', formatCurrency(overallStats.totalPaid)],
-    ['Total Due:', formatCurrency(overallStats.totalDue)],
-    ['Total Items:', overallStats.totalItems.toString()]
-  ]
-
-  summaryData.forEach(([label, value]) => {
-    pdf.text(label, margin, currentY)
-    pdf.text(value, margin + 50, currentY)
-    currentY += 6
-  })
-
-  currentY += 10
-
-  // Category breakdown
-  pdf.setFontSize(12)
-  pdf.setFont('helvetica', 'bold')
+  pdf.setTextColor(...colors.primary)
   pdf.text('CATEGORY BREAKDOWN', margin, currentY)
-  currentY += 8
+  currentY += 12
 
-  pdf.setFontSize(9)
+  // Table header with background
+  const tableStartY = currentY
+  const headerHeight = 8
+  const rowHeight = 7
+  const colWidths = [50, 20, 35, 35, 35]
+  const colPositions = [margin]
+  for (let i = 1; i < colWidths.length; i++) {
+    colPositions[i] = colPositions[i - 1] + colWidths[i - 1]
+  }
+
+  // Header background
+  pdf.setFillColor(...colors.primary)
+  pdf.rect(margin, currentY, pageWidth - 2 * margin, headerHeight, 'F')
+  
+  // Header text
+  pdf.setFontSize(10)
   pdf.setFont('helvetica', 'bold')
-  pdf.text('Category', margin, currentY)
-  pdf.text('Count', margin + 40, currentY)
-  pdf.text('Total', margin + 60, currentY)
-  pdf.text('Paid', margin + 85, currentY)
-  pdf.text('Due', margin + 110, currentY)
-  currentY += 2
-  pdf.line(margin, currentY, pageWidth - margin, currentY)
-  currentY += 5
-
-  pdf.setFont('helvetica', 'normal')
-  categoryTotals.forEach((category) => {
-    pdf.text(category.name, margin, currentY)
-    pdf.text(category.count.toString(), margin + 40, currentY)
-    pdf.text(formatCurrency(category.total), margin + 60, currentY)
-    pdf.text(formatCurrency(category.paid), margin + 85, currentY)
-    pdf.text(formatCurrency(category.due), margin + 110, currentY)
-    currentY += 6
+  pdf.setTextColor(...colors.white)
+  const headers = ['Category', 'Count', 'Total', 'Paid', 'Due']
+  headers.forEach((header, index) => {
+    pdf.text(header, colPositions[index] + 2, currentY + 5)
   })
+  currentY += headerHeight
+
+  // Table rows with alternating colors
+  pdf.setFont('helvetica', 'normal')
+  categoryTotals.forEach((category, index) => {
+    // Alternate row background
+    if (index % 2 === 0) {
+      pdf.setFillColor(...colors.alternateRow)
+      pdf.rect(margin, currentY, pageWidth - 2 * margin, rowHeight, 'F')
+    }
+    
+    pdf.setTextColor(...colors.dark)
+    pdf.text(category.name, colPositions[0] + 2, currentY + 5)
+    pdf.text(category.count.toString(), colPositions[1] + 2, currentY + 5)
+    
+    // Color-coded amounts
+    pdf.setTextColor(...colors.dark)
+    pdf.text(formatCurrency(category.total), colPositions[2] + 2, currentY + 5)
+    
+    pdf.setTextColor(...colors.secondary)
+    pdf.text(formatCurrency(category.paid), colPositions[3] + 2, currentY + 5)
+    
+    pdf.setTextColor(...colors.danger)
+    pdf.text(formatCurrency(category.due), colPositions[4] + 2, currentY + 5)
+    
+    currentY += rowHeight
+  })
+
+  // Table border
+  pdf.setDrawColor(...colors.border)
+  pdf.setLineWidth(0.3)
+  pdf.rect(margin, tableStartY, pageWidth - 2 * margin, headerHeight + (categoryTotals.length * rowHeight))
 
   currentY += 15
 
-  // Function to create detailed table for each category
+  // Function to create detailed table for each category with enhanced styling
   const createDetailedTable = (title: string, items: any[], columns: string[], getValue: (item: any, column: string) => string) => {
-    checkPageBreak(20)
+    checkPageBreak(25)
+    
+    // Section title with colored background
+    pdf.setFillColor(...colors.light)
+    pdf.rect(margin, currentY - 2, pageWidth - 2 * margin, 12, 'F')
     
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
-    pdf.text(title, margin, currentY)
-    currentY += 10
+    pdf.setTextColor(...colors.primary)
+    pdf.text(title, margin + 5, currentY + 6)
+    currentY += 15
 
     if (items.length === 0) {
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'italic')
-      pdf.text('No items found', margin, currentY)
-      currentY += 15
+      pdf.setTextColor(...colors.dark)
+      pdf.text('No items found', margin + 5, currentY)
+      currentY += 20
       return
     }
 
-    // Table headers
-    pdf.setFontSize(8)
+    // Calculate column widths dynamically
+    const tableWidth = pageWidth - 2 * margin
+    const colWidth = tableWidth / columns.length
+    const headerHeight = 8
+    const rowHeight = 6
+    
+    // Table header with gradient-like effect
+    pdf.setFillColor(...colors.primary)
+    pdf.rect(margin, currentY, tableWidth, headerHeight, 'F')
+    
+    // Header text
+    pdf.setFontSize(9)
     pdf.setFont('helvetica', 'bold')
-    const colWidth = (pageWidth - 2 * margin) / columns.length
+    pdf.setTextColor(...colors.white)
     columns.forEach((col, index) => {
-      pdf.text(col, margin + index * colWidth, currentY)
+      const xPos = margin + (index * colWidth) + 2
+      pdf.text(col, xPos, currentY + 5)
     })
-    currentY += 2
-    pdf.line(margin, currentY, pageWidth - margin, currentY)
-    currentY += 5
+    currentY += headerHeight
 
-    // Table rows
+    // Table rows with enhanced styling
     pdf.setFont('helvetica', 'normal')
-    items.forEach((item, index) => {
-      checkPageBreak(8)
+    pdf.setFontSize(8)
+    
+    items.forEach((item, itemIndex) => {
+      checkPageBreak(rowHeight + 2)
+      
+      // Alternate row background
+      if (itemIndex % 2 === 0) {
+        pdf.setFillColor(...colors.alternateRow)
+        pdf.rect(margin, currentY, tableWidth, rowHeight, 'F')
+      }
       
       columns.forEach((col, colIndex) => {
         const value = getValue(item, col)
-        const text = value.length > 15 ? value.substring(0, 15) + '...' : value
-        pdf.text(text, margin + colIndex * colWidth, currentY)
+        let displayText = value.length > 18 ? value.substring(0, 18) + '...' : value
+        const xPos = margin + (colIndex * colWidth) + 2
+        
+        // Color coding for specific columns
+        if (col === 'Amount' || col === 'Total') {
+          pdf.setTextColor(...colors.dark)
+        } else if (col === 'Paid') {
+          pdf.setTextColor(...colors.secondary)
+        } else if (col === 'Due') {
+          pdf.setTextColor(...colors.danger)
+        } else {
+          pdf.setTextColor(...colors.dark)
+        }
+        
+        pdf.text(displayText, xPos, currentY + 4)
       })
-      currentY += 6
-      
-      // Add subtle line after every 5 rows, but not after the last item
-      if ((index + 1) % 5 === 0 && index < items.length - 1) {
-        pdf.setDrawColor(220, 220, 220)
-        pdf.line(margin, currentY, pageWidth - margin, currentY)
-        pdf.setDrawColor(0, 0, 0)
-        currentY += 2
-      }
+      currentY += rowHeight
     })
+
+    // Table border
+    pdf.setDrawColor(...colors.border)
+    pdf.setLineWidth(0.3)
+    const tableHeight = headerHeight + (items.length * rowHeight)
+    pdf.rect(margin, currentY - tableHeight, tableWidth, tableHeight)
+    
+    // Reset colors
+    pdf.setTextColor(0, 0, 0)
+    pdf.setDrawColor(0, 0, 0)
+    pdf.setLineWidth(0.2)
 
     currentY += 15
   }
@@ -322,14 +447,29 @@ export const exportAnalyticsToPDF = async (data: ExportData) => {
     }
   )
 
-  // Add footer with page numbers
+  // Add enhanced footer with page numbers and branding
   const totalPages = pdf.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     pdf.setPage(i)
+    
+    // Footer background
+    pdf.setFillColor(...colors.light)
+    pdf.rect(0, pageHeight - 15, pageWidth, 15, 'F')
+    
+    // Footer content
     pdf.setFontSize(8)
     pdf.setFont('helvetica', 'normal')
-    pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: 'right' })
-    pdf.text('Friendz Youth - Analytics Report', margin, pageHeight - 10)
+    pdf.setTextColor(...colors.dark)
+    
+    // Left side - Company name
+    pdf.text('Friendz Youth - Analytics Report', margin, pageHeight - 6)
+    
+    // Right side - Page numbers
+    pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 6, { align: 'right' })
+    
+    // Center - Generation timestamp
+    const timestamp = new Date().toLocaleString('en-IN')
+    pdf.text(`Generated: ${timestamp}`, pageWidth / 2, pageHeight - 6, { align: 'center' })
   }
 
   // Save the PDF

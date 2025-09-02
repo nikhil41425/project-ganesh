@@ -135,7 +135,7 @@ export default function AuctionPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Auction Management</h1>
+        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Auction (సవాల్)</h1>
       
       <Auction
         items={auctionItems}

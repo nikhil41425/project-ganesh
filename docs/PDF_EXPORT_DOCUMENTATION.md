@@ -2,14 +2,40 @@
 
 ## Overview
 
-The analytics tab now includes comprehensive PDF export functionality that allows users to export all their data in two different formats:
+The analytics tab now includes comprehensive PDF export functionality that allows users to export all their data in three different formats:
 
-1. **Detailed PDF Export** - A comprehensive text-based report with all data details
-2. **Visual PDF Export** - An enhanced report with visual charts and styling
+1. **Telugu-Compatible PDF Export** - Enhanced report with proper Telugu font support (RECOMMENDED)
+2. **Detailed PDF Export** - A comprehensive text-based report with all data details  
+3. **Visual PDF Export** - An enhanced report with visual charts and styling
 
 ## Features
 
-### 1. Detailed PDF Export
+### 1. Telugu-Compatible PDF Export (NEW)
+
+**File**: `src/utils/pdfExportTelugu.ts`
+
+This is the **RECOMMENDED** export option that properly handles Telugu text rendering.
+
+**Features:**
+- **Full Telugu Unicode Support**: Properly renders Telugu characters using Noto Sans Telugu font
+- **Bilingual Headers**: Both English and Telugu titles and labels
+- **Web Font Loading**: Automatically loads Google Fonts for proper Telugu rendering
+- **HTML-to-Canvas Rendering**: Uses html2canvas to ensure perfect Telugu character display
+- **Professional Styling**: Modern gradients, colors, and responsive layouts
+- **High-Quality Output**: 2x scale rendering for crisp text and clear Telugu characters
+
+**Telugu Translations Included:**
+- విశ్లేషణ రిపోర్ట్ (Analytics Report)
+- వేలం అంశాలు (Auction Items)
+- సభ్యత్వ అంశాలు (Membership Items)
+- ఖర్చు అంశాలు (Expense Items)
+- విరాళ అంశాలు (Donation Items)
+- బకాయిలు (Dues Items)
+- మొత్తం మొత్తం (Total Amount)
+- మొత్తం చెల్లింపు (Total Paid)
+- మొత్తం బకాయి (Total Due)
+
+### 2. Detailed PDF Export
 
 **File**: `src/utils/pdfExport.ts`
 
@@ -162,25 +188,39 @@ Possible improvements for future versions:
 1. Navigate to the Analytics tab in the dashboard
 2. Ensure data is loaded (all categories will be displayed)
 3. Choose export option:
-   - **"Export Detailed PDF"**: For comprehensive text-based report
-   - **"Export Visual PDF"**: For enhanced report with charts
+   - **"Export Telugu PDF"**: For proper Telugu text rendering (RECOMMENDED)
+   - **"Export Simple PDF"**: For basic text-based report
+   - **"Export Visual PDF"**: For enhanced report with charts (disabled by default)
 4. Wait for processing (button will show "Exporting...")
 5. PDF will automatically download when ready
 6. Check Downloads folder for the generated file
 
 ## Troubleshooting
 
+### Telugu Text Issues
+
+1. **Telugu characters showing as boxes/question marks**:
+   - Use "Export Telugu PDF" instead of "Export Simple PDF"
+   - Ensure stable internet connection for font loading
+   - Wait for fonts to load completely before export
+
+2. **Font loading issues**:
+   - Clear browser cache and cookies
+   - Try refreshing the page and waiting a few seconds before export
+   - Check if Google Fonts is accessible
+
 ### Common Issues
 
 1. **Export fails**: 
    - Check browser pop-up blockers
    - Ensure sufficient browser memory
-   - Try detailed export if visual export fails
+   - Try simple export if Telugu export fails
+   - Ensure stable internet connection for font loading
 
 2. **Slow performance**:
    - Large datasets may take longer
    - Close other browser tabs
-   - Use detailed export for better performance
+   - Telugu export takes longer due to font loading and canvas rendering
 
 3. **Missing data**:
    - Ensure all tabs have been visited to load data

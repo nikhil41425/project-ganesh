@@ -154,8 +154,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Analytics Dashboard</h1>
-      
+        <h1 className="text-xl font-bold text-gray-600">Dashboard (Analytics / విశ్లేషణ)</h1>
+
       <Analytics
         auctionItems={auctionItems}
         membershipItems={membershipItems}

@@ -134,7 +134,7 @@ export default function MembershipPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Membership Management</h1>
+        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Membership (సబ్యత్వం)</h1>
       
       <Membership
         items={membershipItems}

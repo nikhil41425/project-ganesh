@@ -7,10 +7,10 @@ export default function Footer() {
 
   return (
     <footer className="bg-white/80 backdrop-blur-lg border-t border-white/20 mt-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Bottom Section */}
-        <div className="mt-8 pt-8 border-t border-gray-200/50">
+        <div className="mt-8 border-t border-gray-200/50">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex flex-col items-center md:items-start">
               <p className="text-sm text-gray-600">

@@ -24,7 +24,7 @@ export default function Header({ onLogout }: HeaderProps) {
   const tabs = [
     { 
       id: 'analytics',
-      name: 'Analytics', 
+      name: 'Dashboard (విశ్లేషణ)', 
       icon: BarChart3,
       href: '/dashboard',
       color: 'from-indigo-500 to-purple-500',
@@ -33,7 +33,7 @@ export default function Header({ onLogout }: HeaderProps) {
     },
     { 
       id: 'auction',
-      name: 'Auction', 
+      name: 'Auction (సవాల్)', 
       icon: ShoppingBag,
       href: '/dashboard/auction',
       color: 'from-purple-500 to-pink-500',
@@ -42,7 +42,7 @@ export default function Header({ onLogout }: HeaderProps) {
     },
     { 
       id: 'membership',
-      name: 'Membership', 
+      name: 'Membership (సబ్యత్వం)', 
       icon: Users,
       href: '/dashboard/membership',
       color: 'from-blue-500 to-cyan-500',
@@ -51,7 +51,7 @@ export default function Header({ onLogout }: HeaderProps) {
     },
     { 
       id: 'expenses',
-      name: 'Expenses', 
+      name: 'Expenses (కర్చులు)', 
       icon: Receipt,
       href: '/dashboard/expenses',
       color: 'from-green-500 to-emerald-500',
@@ -60,7 +60,7 @@ export default function Header({ onLogout }: HeaderProps) {
     },
     { 
       id: 'donations',
-      name: 'Donations', 
+      name: 'Donations (చంద)', 
       icon: Heart,
       href: '/dashboard/donations',
       color: 'from-orange-500 to-red-500',

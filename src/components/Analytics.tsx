@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingBag, Heart, Receipt, Download, FileText, BarChart3 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { TrendingUp, TrendingDown, DollarSign, Users, ShoppingBag, Heart, Receipt, Download, FileText, BarChart3, Languages, CheckCircle, XCircle, X, Loader2 } from 'lucide-react'
 import { exportAnalyticsToPDF } from '@/utils/pdfExport'
 import { exportAnalyticsWithChartsToPDF } from '@/utils/pdfExportAdvanced'
 
@@ -13,6 +14,13 @@ interface AnalyticsProps {
   duesItems: any[]
 }
 
+interface ToastNotification {
+  id: number
+  message: string
+  type: 'success' | 'error'
+  show: boolean
+}
+
 export default function Analytics({ 
   auctionItems = [], 
   membershipItems = [], 
@@ -21,7 +29,71 @@ export default function Analytics({
   duesItems = [] 
 }: AnalyticsProps) {
   
+  const router = useRouter()
   const [isExporting, setIsExporting] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const [navigatingCard, setNavigatingCard] = useState<string | null>(null)
+  const [notifications, setNotifications] = useState<ToastNotification[]>([])
+  const [nextId, setNextId] = useState(1)
+
+  // Function to show toast notification
+  const showToast = (message: string, type: 'success' | 'error') => {
+    const id = nextId
+    setNextId(prev => prev + 1)
+    
+    const newNotification: ToastNotification = {
+      id,
+      message,
+      type,
+      show: true
+    }
+    
+    setNotifications(prev => [...prev, newNotification])
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === id ? { ...notif, show: false } : notif
+        )
+      )
+      // Remove from array after fade out animation
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(notif => notif.id !== id))
+      }, 300)
+    }, 4000)
+  }
+
+  // Function to manually close toast
+  const closeToast = (id: number) => {
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, show: false } : notif
+      )
+    )
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(notif => notif.id !== id))
+    }, 300)
+  }
+  
+  // Function to handle navigation to different sections
+  const handleNavigateToSection = async (route: string, cardName: string) => {
+    setIsNavigating(true)
+    setNavigatingCard(cardName)
+    
+    try {
+      await router.push(route)
+    } catch (error) {
+      console.error('Navigation error:', error)
+      showToast('❌ Navigation failed. Please try again.', 'error')
+    } finally {
+      // Small delay to show loader even if navigation is fast
+      setTimeout(() => {
+        setIsNavigating(false)
+        setNavigatingCard(null)
+      }, 500)
+    }
+  }
   
   // Helper function to safely convert to number
   const safeNumber = (value: any): number => {
@@ -39,40 +111,44 @@ export default function Analytics({
   // Calculate totals for each category with proper null/undefined handling
   const categoryTotals = [
     { 
-      name: 'Auction',
+      name: 'Auction (సవాల్)',
       total: auctionItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
       paid: auctionItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
       due: auctionItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
       count: auctionItems.length,
       icon: ShoppingBag,
-      color: '#8b5cf6'
+      color: '#8b5cf6',
+      route: '/dashboard/auction'
     },
     { 
-      name: 'Membership',
+      name: 'Membership (సబ్యత్వం)',
       total: membershipItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
       paid: membershipItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
       due: membershipItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
       count: membershipItems.length,
       icon: Users,
-      color: '#3b82f6'
+      color: '#3b82f6',
+      route: '/dashboard/membership'
     },
     { 
-      name: 'Expenses',
+      name: 'Expenses (కర్చులు)',
       total: spentItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
       paid: spentItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
       due: spentItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
       count: spentItems.length,
       icon: Receipt,
-      color: '#10b981'
+      color: '#10b981',
+      route: '/dashboard/expenses'
     },
     { 
-      name: 'Donations',
+      name: 'Donations (చంద)',
       total: donationItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
       paid: donationItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
       due: donationItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
       count: donationItems.length,
       icon: Heart,
-      color: '#f59e0b'
+      color: '#f59e0b',
+      route: '/dashboard/donations'
     },
     { 
       name: 'Dues',
@@ -81,7 +157,8 @@ export default function Analytics({
       due: duesItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
       count: duesItems.length,
       icon: DollarSign,
-      color: '#06b6d4'
+      color: '#06b6d4',
+      route: '/dashboard/dues'
     }
   ]
 
@@ -121,10 +198,10 @@ export default function Analytics({
         donationItems,
         duesItems
       })
-      alert('PDF exported successfully!')
+      showToast('📄 PDF exported successfully! Check your downloads folder.', 'success')
     } catch (error) {
       console.error('Error exporting PDF:', error)
-      alert('Error exporting PDF. Please try again.')
+      showToast('❌ Error exporting PDF. Please try again.', 'error')
     } finally {
       setIsExporting(false)
     }
@@ -141,10 +218,10 @@ export default function Analytics({
         donationItems,
         duesItems
       })
-      alert('Visual PDF exported successfully!')
+      showToast('📊 Visual PDF exported successfully! Check your downloads folder.', 'success')
     } catch (error) {
       console.error('Error exporting visual PDF:', error)
-      alert('Error exporting visual PDF. Please try again.')
+      showToast('❌ Error exporting visual PDF. Please try again.', 'error')
     } finally {
       setIsExporting(false)
     }
@@ -153,7 +230,43 @@ export default function Analytics({
 
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl">
+    <div className="space-y-6 bg-gradient-to-br from-gray-50 to-white p-1 rounded-xl">
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`transform transition-all duration-300 ease-in-out ${
+              notification.show 
+                ? 'translate-x-0 opacity-100' 
+                : 'translate-x-full opacity-0'
+            }`}
+          >
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-80 max-w-md ${
+              notification.type === 'success' 
+                ? 'bg-green-50 border border-green-200 text-green-800' 
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              {notification.type === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+              ) : (
+                <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              )}
+              <p className="flex-1 text-sm font-medium">{notification.message}</p>
+              <button
+                onClick={() => closeToast(notification.id)}
+                className={`p-1 rounded-full transition-colors ${
+                  notification.type === 'success'
+                    ? 'hover:bg-green-100 text-green-600'
+                    : 'hover:bg-red-100 text-red-600'
+                }`}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
       {/* Header with Export Buttons */}
       <div className="flex justify-between items-center mb-6">
         <div className="w-full">
@@ -221,6 +334,7 @@ export default function Analytics({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {categoryTotals.map((category, index) => {
           const IconComponent = category.icon
+          const isCardLoading = isNavigating && navigatingCard === category.name
           const gradients = [
             'bg-gradient-to-br from-blue-50 to-blue-100',
             'bg-gradient-to-br from-green-50 to-green-100', 
@@ -229,7 +343,33 @@ export default function Analytics({
             'bg-gradient-to-br from-pink-50 to-pink-100'
           ]
           return (
-            <div key={category.name} className={`${gradients[index % gradients.length]} rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow`}>
+            <div 
+              key={category.name} 
+              className={`${gradients[index % gradients.length]} rounded-lg border border-gray-200 p-3 transition-all duration-200 relative ${
+                isCardLoading 
+                  ? 'cursor-wait opacity-75' 
+                  : 'cursor-pointer hover:shadow-md hover:scale-105 hover:border-gray-300 active:scale-95'
+              }`}
+              onClick={() => !isNavigating && handleNavigateToSection(category.route, category.name)}
+              role="button"
+              tabIndex={isNavigating ? -1 : 0}
+              onKeyDown={(e) => {
+                if (!isNavigating && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  handleNavigateToSection(category.route, category.name)
+                }
+              }}
+            >
+              {/* Loading Overlay */}
+              {isCardLoading && (
+                <div className="absolute inset-0 bg-white bg-opacity-50 rounded-lg flex items-center justify-center z-10">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
+                    <span className="text-xs text-gray-600 font-medium">Loading...</span>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center justify-between mb-2">
                 <IconComponent className="h-5 w-5" style={{ color: category.color }} />
                 <span className="text-xs font-medium text-gray-600">{category.count} items</span>

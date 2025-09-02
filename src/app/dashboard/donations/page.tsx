@@ -134,7 +134,7 @@ export default function DonationsPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Donations Management</h1>
+        <h1 className="text-xl font-bold text-gray-600">Donations (చంద)</h1>
       
       <Donations
         items={donationItems}
