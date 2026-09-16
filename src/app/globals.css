@@ -357,45 +357,95 @@ body {
   }
 
   .dashboard-detail-page table {
-    min-width: 100% !important;
-    table-layout: fixed;
+    table-layout: auto;
   }
 
   .dashboard-detail-page th,
   .dashboard-detail-page td {
-    min-width: 0 !important;
     padding: 0.75rem 0.5rem !important;
-    overflow: hidden;
+    display: table-cell !important;
+    overflow: visible;
   }
 
-  .dashboard-detail-page th:nth-child(5),
-  .dashboard-detail-page td:nth-child(5),
-  .dashboard-detail-page th:nth-child(6),
-  .dashboard-detail-page td:nth-child(6),
-  .dashboard-detail-page th:nth-child(7),
-  .dashboard-detail-page td:nth-child(7) {
-    display: none;
+  .dashboard-detail-page table:has(th:nth-child(8)) {
+    min-width: 70rem !important;
   }
 
-  .dashboard-detail-page table:has(th:nth-child(9)) th:nth-child(5),
-  .dashboard-detail-page table:has(th:nth-child(9)) td:nth-child(5) {
-    display: table-cell;
+  .dashboard-detail-page table:has(th:nth-child(9)) {
+    min-width: 80rem !important;
   }
 
-  .dashboard-detail-page table:has(th:nth-child(9)) th:nth-child(8),
-  .dashboard-detail-page table:has(th:nth-child(9)) td:nth-child(8) {
-    display: none;
+  .dashboard-detail-page th:first-child,
+  .dashboard-detail-page td:first-child {
+    min-width: 12rem !important;
+    max-width: 18rem;
+  }
+
+  .dashboard-detail-page table:has(th:nth-child(9)) th:nth-child(2),
+  .dashboard-detail-page table:has(th:nth-child(9)) td:nth-child(2) {
+    min-width: 11rem !important;
+  }
+
+  .dashboard-detail-page th:nth-child(2),
+  .dashboard-detail-page td:nth-child(2),
+  .dashboard-detail-page th:nth-child(3),
+  .dashboard-detail-page td:nth-child(3),
+  .dashboard-detail-page th:nth-child(4),
+  .dashboard-detail-page td:nth-child(4) {
+    min-width: 7rem !important;
+  }
+
+  .dashboard-detail-page th:nth-last-child(4),
+  .dashboard-detail-page td:nth-last-child(4) {
+    min-width: 11rem !important;
+  }
+
+  .dashboard-detail-page th:nth-last-child(3),
+  .dashboard-detail-page td:nth-last-child(3),
+  .dashboard-detail-page th:nth-last-child(2),
+  .dashboard-detail-page td:nth-last-child(2) {
+    min-width: 8.5rem !important;
   }
 
   .dashboard-detail-page th:last-child,
   .dashboard-detail-page td:last-child {
-    width: 4.75rem;
+    min-width: 6.5rem !important;
   }
 
   .dashboard-detail-page tbody td > div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-detail-page .overflow-x-auto {
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #64748b #0f2932;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-detail-page .overflow-x-auto::-webkit-scrollbar {
+    height: 0.6rem;
+  }
+
+  .dashboard-detail-page .overflow-x-auto::-webkit-scrollbar-track {
+    background: #0f2932;
+  }
+
+  .dashboard-detail-page .overflow-x-auto::-webkit-scrollbar-thumb {
+    border: 2px solid #0f2932;
+    border-radius: 999px;
+    background: #64748b;
+  }
+
+  .dashboard-detail-page td:last-child button {
+    display: inline-flex;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: center;
   }
 
   .dashboard-detail-page tbody:has(td[colspan]) td {
