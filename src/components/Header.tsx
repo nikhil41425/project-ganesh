@@ -1,6 +1,7 @@
 'use client'
 
-import { LogOut, Download, Menu, X, ShoppingBag, Users, Receipt, Heart, DollarSign, BarChart3, CalendarDays } from 'lucide-react'
+import Image from 'next/image'
+import { LogOut, Menu, X, ShoppingBag, Users, Receipt, Heart, DollarSign, BarChart3, CalendarDays } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -116,31 +117,33 @@ export default function Header({ onLogout }: HeaderProps) {
 
   return (
     <>
-      <header className="bg-white/80 backdrop-blur-lg shadow-lg border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-lg">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               <div className="p-0.5 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600">
-                {/* Friends Youth Logo */}
-                <img 
+                <Image
                   src="/icons/friendyouthlogo.png" 
                   alt="Friends Youth Logo" 
-                  className="h-10 w-10 object-contain"
+                  width={40}
+                  height={40}
+                  className="h-9 w-9 object-contain sm:h-10 sm:w-10"
                 />
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
-                Friendz Youth - Choller
-              </h1>
+              <div className="min-w-0 leading-tight">
+                <h1 className="truncate text-sm font-extrabold text-slate-900 sm:text-2xl">Friendz Youth</h1>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:hidden">Choller</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700" htmlFor="dashboard-year">
-                <CalendarDays className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <label className="flex items-center gap-1 text-sm font-medium text-gray-700 sm:gap-2" htmlFor="dashboard-year">
+                <CalendarDays className="hidden h-5 w-5 text-indigo-600 sm:block" aria-hidden="true" />
                 <span className="hidden sm:inline">Year</span>
                 <select
                   id="dashboard-year"
                   value={selectedYear}
                   onChange={(event) => setSelectedYear(Number(event.target.value))}
-                  className="rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-semibold text-gray-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-2 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                   aria-label="Select financial year"
                 >
                   {availableYears.map((year) => (
@@ -151,7 +154,7 @@ export default function Header({ onLogout }: HeaderProps) {
               {/* Hamburger Menu Button for Mobile */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                className="rounded-xl p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 md:hidden"
                 aria-label="Toggle navigation menu"
               >
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -162,8 +165,8 @@ export default function Header({ onLogout }: HeaderProps) {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-lg">
-            <div className="px-4 py-2 space-y-1 max-h-96 overflow-y-auto">
+          <div className="border-t border-gray-200 bg-white/98 shadow-lg backdrop-blur-lg md:hidden">
+            <div className="max-h-[calc(100dvh-5rem)] space-y-1 overflow-y-auto px-3 py-3">
               {tabs.map((tab) => {
                 const Icon = tab.icon
                 const isActive = isActiveTab(tab.href)
@@ -179,7 +182,7 @@ export default function Header({ onLogout }: HeaderProps) {
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     } ${isNavigating ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {/* <Icon className="h-5 w-5" /> */}
+                    <Icon className="h-5 w-5" />
                     <span>{tab.name}</span>
                     {isNavigating && (
                       <div className="ml-auto">
@@ -208,6 +211,27 @@ export default function Header({ onLogout }: HeaderProps) {
           </div>
         )}
       </header>
+
+      <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5">
+          {tabs.filter((tab) => tab.id !== 'dues').map((tab) => {
+            const Icon = tab.icon
+            const active = isActiveTab(tab.href)
+            const label = tab.id === 'analytics' ? 'Home' : tab.id === 'membership' ? 'Members' : tab.name.split(' ')[0]
+            return (
+              <Link
+                key={tab.id}
+                href={tab.href}
+                aria-current={active ? 'page' : undefined}
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors ${active ? 'text-indigo-600' : 'text-slate-500'}`}
+              >
+                <Icon className={`h-5 w-5 ${active ? 'stroke-[2.5]' : ''}`} aria-hidden="true" />
+                <span className="max-w-full truncate">{label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
 
       {/* Navigation Loading Overlay */}
       {isNavigating && (

@@ -55,7 +55,7 @@ export default function DashboardLayout({
         <Header onLogout={handleSignOut} />
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="mx-auto max-w-7xl pb-24 sm:px-6 sm:py-8 md:pb-8 lg:px-8">
           {children}
         </main>
 
