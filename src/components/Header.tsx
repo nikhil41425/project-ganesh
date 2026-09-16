@@ -1,249 +1,90 @@
 'use client'
 
 import Image from 'next/image'
-import { LogOut, Menu, X, ShoppingBag, Users, Receipt, Heart, DollarSign, BarChart3, CalendarDays } from 'lucide-react'
-import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { usePWAInstall } from '@/hooks/usePWAInstall'
-import PWAInstallModal from './PWAInstallModal'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { CalendarDays, ChevronDown, Gavel, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
 import { useYear } from '@/context/YearContext'
 
-interface HeaderProps {
-  onLogout: () => void
-}
+interface HeaderProps { onLogout: () => void }
+
+const tabs = [
+  { id: 'dashboard', name: 'Dashboard', shortName: 'Home', href: '/dashboard', icon: Home },
+  { id: 'auction', name: 'Auction', shortName: 'Auction', href: '/dashboard/auction', icon: Gavel },
+  { id: 'membership', name: 'Membership', shortName: 'Members', href: '/dashboard/membership', icon: Users },
+  { id: 'expenses', name: 'Expenses', shortName: 'Expenses', href: '/dashboard/expenses', icon: ReceiptText },
+  { id: 'donations', name: 'Donations', shortName: 'Donations', href: '/dashboard/donations', icon: Heart },
+]
 
 export default function Header({ onLogout }: HeaderProps) {
-  const { canInstall, isInstalled, isIOS, installPWA } = usePWAInstall()
-  const [showInstallModal, setShowInstallModal] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
   const { selectedYear, setSelectedYear, availableYears } = useYear()
-  
   const router = useRouter()
   const pathname = usePathname()
-
-  // Navigation tabs
-  const tabs = [
-    { 
-      id: 'analytics',
-      name: 'Dashboard (విశ్లేషణ)', 
-      icon: BarChart3,
-      href: '/dashboard',
-      color: 'from-indigo-500 to-purple-500',
-      bgColor: 'bg-indigo-50',
-      textColor: 'text-indigo-600'
-    },
-    { 
-      id: 'auction',
-      name: 'Auction (సవాల్)', 
-      icon: ShoppingBag,
-      href: '/dashboard/auction',
-      color: 'from-purple-500 to-pink-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600'
-    },
-    { 
-      id: 'membership',
-      name: 'Membership (సబ్యత్వం)', 
-      icon: Users,
-      href: '/dashboard/membership',
-      color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600'
-    },
-    { 
-      id: 'expenses',
-      name: 'Expenses (కర్చులు)', 
-      icon: Receipt,
-      href: '/dashboard/expenses',
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600'
-    },
-    { 
-      id: 'donations',
-      name: 'Donations (చంద)', 
-      icon: Heart,
-      href: '/dashboard/donations',
-      color: 'from-orange-500 to-red-500',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-600'
-    },
-    { 
-      id: 'dues',
-      name: 'Dues', 
-      icon: DollarSign,
-      href: '/dashboard/dues',
-      color: 'from-teal-500 to-cyan-500',
-      bgColor: 'bg-teal-50',
-      textColor: 'text-teal-600'
-    }
-  ]
-
-  const handlePWAInstall = () => {
-    setShowInstallModal(true)
-  }
-
-  const handleInstallFromModal = async () => {
-    await installPWA()
-  }
-
-  const isActiveTab = (href: string) => {
-    if (href === '/dashboard') {
-      return pathname === '/dashboard'
-    }
-    return pathname.startsWith(href)
-  }
-
-  const handleNavigation = (href: string) => {
+  const isActive = (href: string) => href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+  const navigate = (href: string) => {
     setIsNavigating(true)
     setIsMobileMenuOpen(false)
     router.push(href)
-    
-    // Reset loading state after a short delay to ensure smooth transition
-    setTimeout(() => {
-      setIsNavigating(false)
-    }, 500)
+    setTimeout(() => setIsNavigating(false), 350)
   }
-
-  const handleLogout = () => {
-    setIsMobileMenuOpen(false)
-    onLogout()
-  }
-
-  // Always show download button on mobile for now (for testing)
-  const showDownloadButton = true
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-lg">
-        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-              <div className="p-0.5 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600">
-                <Image
-                  src="/icons/friendyouthlogo.png" 
-                  alt="Friends Youth Logo" 
-                  width={40}
-                  height={40}
-                  className="h-9 w-9 object-contain sm:h-10 sm:w-10"
-                />
-              </div>
+      <header className="sticky top-0 z-50 border-b border-slate-700/70 bg-[#071b25]/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-[72px] items-center justify-between gap-3">
+            <Link href="/dashboard" className="flex min-w-0 items-center gap-3" aria-label="Friendz Youth dashboard">
+              <Image src="/icons/friendyouthlogo.png" alt="" width={42} height={42} className="h-10 w-10 rounded-xl object-cover" priority />
               <div className="min-w-0 leading-tight">
-                <h1 className="truncate text-sm font-extrabold text-slate-900 sm:text-2xl">Friendz Youth</h1>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 sm:hidden">Choller</p>
+                <p className="truncate text-[15px] font-bold text-white sm:text-lg">Friendz Youth</p>
+                <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Choller</p>
               </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-              <label className="flex items-center gap-1 text-sm font-medium text-gray-700 sm:gap-2" htmlFor="dashboard-year">
-                <CalendarDays className="hidden h-5 w-5 text-indigo-600 sm:block" aria-hidden="true" />
-                <span className="hidden sm:inline">Year</span>
-                <select
-                  id="dashboard-year"
-                  value={selectedYear}
-                  onChange={(event) => setSelectedYear(Number(event.target.value))}
-                  className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-2 text-sm font-bold text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  aria-label="Select financial year"
-                >
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
+            </Link>
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="relative flex h-11 min-w-[104px] items-center gap-2 rounded-xl border border-slate-600 bg-[#102a36] px-2.5 shadow-sm transition hover:border-slate-500 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 sm:min-w-[116px]">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-400/10 text-emerald-300">
+                  <CalendarDays className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1 leading-none" aria-hidden="true">
+                  <span className="block text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500">Year</span>
+                  <span className="mt-1 block text-sm font-bold text-white">{selectedYear}</span>
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
+                <label className="sr-only" htmlFor="dashboard-year">Financial year</label>
+                <select id="dashboard-year" value={selectedYear} onChange={(event) => setSelectedYear(Number(event.target.value))} className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent text-transparent outline-none" aria-label="Select financial year">
+                  {availableYears.map((year) => <option key={year} value={year} className="bg-white text-slate-900">{year}</option>)}
                 </select>
-              </label>
-              {/* Hamburger Menu Button for Mobile */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-xl p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 md:hidden"
-                aria-label="Toggle navigation menu"
-              >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </div>
+              <button type="button" onClick={() => setIsMobileMenuOpen((open) => !open)} className="h-11 rounded-xl border border-slate-600 px-3 text-xs font-bold uppercase tracking-wider text-slate-200 transition hover:border-slate-400 md:hidden" aria-expanded={isMobileMenuOpen} aria-controls="mobile-menu">
+                {isMobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+                <span className="sr-only">{isMobileMenuOpen ? 'Close menu' : 'Open menu'}</span>
               </button>
             </div>
           </div>
+          <nav aria-label="Desktop navigation" className="hidden h-12 items-center gap-7 border-t border-slate-700/50 md:flex">
+            {tabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`flex h-full items-center gap-2 border-b-2 text-sm font-semibold transition ${isActive(tab.href) ? 'border-emerald-400 text-white' : 'border-transparent text-slate-400 hover:text-white'}`}><Icon className="h-4 w-4" aria-hidden="true" />{tab.name}</Link> })}
+            <button type="button" onClick={onLogout} className="ml-auto flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</button>
+          </nav>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="border-t border-gray-200 bg-white/98 shadow-lg backdrop-blur-lg md:hidden">
-            <div className="max-h-[calc(100dvh-5rem)] space-y-1 overflow-y-auto px-3 py-3">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                const isActive = isActiveTab(tab.href)
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleNavigation(tab.href)}
-                    disabled={isNavigating}
-                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 w-full text-left ${
-                      isActive
-                        ? `${tab.bgColor} ${tab.textColor} font-medium shadow-sm`
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    } ${isNavigating ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{tab.name}</span>
-                    {isNavigating && (
-                      <div className="ml-auto">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-              
-              {/* Divider */}
-              <div className="border-t border-gray-200 my-2"></div>
-              
-              {/* Mobile Sign Out Button */}
-              <button
-                onClick={handleLogout}
-                disabled={isNavigating}
-                className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors w-full text-left ${
-                  isNavigating ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <LogOut className="h-5 w-5" />
-                <span>Sign Out</span>
-              </button>
-            </div>
+        {isMobileMenuOpen ? (
+          <div id="mobile-menu" className="border-t border-slate-700 bg-[#0b222d] px-4 py-3 md:hidden">
+            <nav aria-label="Menu navigation" className="mx-auto max-w-7xl space-y-1">
+              {tabs.map((tab) => { const Icon = tab.icon; return <button key={tab.id} type="button" onClick={() => navigate(tab.href)} disabled={isNavigating} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${isActive(tab.href) ? 'bg-[#173642] text-emerald-300' : 'text-slate-300 hover:bg-[#102a36]'}`}><Icon className="h-5 w-5" aria-hidden="true" /><span>{tab.name}</span>{isActive(tab.href) ? <span className="ml-auto text-[10px] uppercase tracking-wider">Current</span> : null}</button> })}
+              <div className="my-2 border-t border-slate-700" />
+              <button type="button" onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-rose-300 hover:bg-[#102a36]"><LogOut className="h-5 w-5" aria-hidden="true" />Sign out</button>
+            </nav>
           </div>
-        )}
+        ) : null}
       </header>
-
-      <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden">
+      <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-700 bg-[#102a36]/98 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5">
-          {tabs.filter((tab) => tab.id !== 'dues').map((tab) => {
-            const Icon = tab.icon
-            const active = isActiveTab(tab.href)
-            const label = tab.id === 'analytics' ? 'Home' : tab.id === 'membership' ? 'Members' : tab.name.split(' ')[0]
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                aria-current={active ? 'page' : undefined}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors ${active ? 'text-indigo-600' : 'text-slate-500'}`}
-              >
-                <Icon className={`h-5 w-5 ${active ? 'stroke-[2.5]' : ''}`} aria-hidden="true" />
-                <span className="max-w-full truncate">{label}</span>
-              </Link>
-            )
-          })}
+          {tabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition ${isActive(tab.href) ? 'text-emerald-300' : 'text-slate-400'}`}>{isActive(tab.href) ? <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-emerald-400" /> : null}<Icon className="h-[18px] w-[18px]" aria-hidden="true" /><span className="truncate">{tab.shortName}</span></Link> })}
         </div>
       </nav>
-
-      {/* Navigation Loading Overlay */}
-      {isNavigating && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            <p className="text-gray-700 font-medium">Loading page...</p>
-          </div>
-        </div>
-      )}
-
-      
+      {isNavigating ? <div className="fixed inset-0 z-[60] grid place-items-center bg-[#071b25]/70 backdrop-blur-sm"><div className="rounded-xl border border-slate-600 bg-[#102a36] px-5 py-3 text-sm font-semibold text-white">Loading…</div></div> : null}
     </>
   )
 }

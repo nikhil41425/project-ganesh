@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Download, Heart, Loader2, Receipt, Share2, ShoppingBag, Users } from 'lucide-react'
 import { exportAnalyticsToPDF } from '@/utils/pdfExport'
 import type { AuctionItem, DonationItem, DuesItem, MembershipItem, SpentItem } from '@/types'
 
@@ -56,17 +55,17 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   }, [auctionItems, donationItems, membershipItems, spentItems])
 
   const summaryRows = [
-    { label: 'Membership (Contributions)', entries: `${membershipItems.length} people`, total: sumField(membershipItems, 'amount'), paid: sumField(membershipItems, 'paid'), due: sumField(membershipItems, 'due'), route: '/dashboard/membership', icon: Users },
-    { label: 'Expenses', entries: `${spentItems.length} items`, total: dashboard.expenseTotal, paid: dashboard.expensePaid, due: dashboard.expenseDue, route: '/dashboard/expenses', icon: Receipt },
-    { label: 'Auction', entries: `${auctionItems.length} items`, total: sumField(auctionItems, 'amount'), paid: sumField(auctionItems, 'paid'), due: sumField(auctionItems, 'due'), route: '/dashboard/auction', icon: ShoppingBag },
-    { label: 'Donations', entries: `${donationItems.length} people`, total: sumField(donationItems, 'amount'), paid: sumField(donationItems, 'paid'), due: sumField(donationItems, 'due'), route: '/dashboard/donations', icon: Heart },
+    { label: 'Membership', entries: `${membershipItems.length} people`, total: sumField(membershipItems, 'amount'), paid: sumField(membershipItems, 'paid'), due: sumField(membershipItems, 'due'), route: '/dashboard/membership' },
+    { label: 'Expenses', entries: `${spentItems.length} items`, total: dashboard.expenseTotal, paid: dashboard.expensePaid, due: dashboard.expenseDue, route: '/dashboard/expenses' },
+    { label: 'Auction', entries: `${auctionItems.length} items`, total: sumField(auctionItems, 'amount'), paid: sumField(auctionItems, 'paid'), due: sumField(auctionItems, 'due'), route: '/dashboard/auction' },
+    { label: 'Donations', entries: `${donationItems.length} people`, total: sumField(donationItems, 'amount'), paid: sumField(donationItems, 'paid'), due: sumField(donationItems, 'due'), route: '/dashboard/donations' },
   ]
 
   const quickActions = [
-    { label: 'Membership dues', route: '/dashboard/membership', icon: Users },
-    { label: 'Auction dues', route: '/dashboard/auction', icon: ShoppingBag },
-    { label: 'Donation dues', route: '/dashboard/donations', icon: Heart },
-    { label: 'Expense dues', route: '/dashboard/expenses', icon: Receipt },
+    { label: 'Membership dues', route: '/dashboard/membership' },
+    { label: 'Auction dues', route: '/dashboard/auction' },
+    { label: 'Donation dues', route: '/dashboard/donations' },
+    { label: 'Expense dues', route: '/dashboard/expenses' },
   ]
 
   const totalStatuses = dashboard.incomingItems.length
@@ -148,20 +147,20 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Quick actions</p>
           <h2 className="mt-2 text-xl font-bold">What do you want to check?</h2>
           <div className="mt-4 hidden gap-3 sm:grid sm:grid-cols-2">
-            {quickActions.map(({ label, route, icon: Icon }) => (
+            {quickActions.map(({ label, route }) => (
               <button key={label} onClick={() => router.push(route)} className="group flex items-center justify-between rounded-xl border border-slate-600 bg-[#173642] px-4 py-4 text-left font-semibold transition hover:border-emerald-400 hover:bg-[#1b4050]">
-                <span className="flex items-center gap-3"><Icon className="h-5 w-5 text-emerald-300" />{label}</span><ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <span>{label}</span><span className="text-xs text-slate-400">View</span>
               </button>
             ))}
-            <button onClick={handleShare} className="flex items-center justify-center gap-2 rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900"><Share2 className="h-5 w-5" /> Share summary</button>
+            <button onClick={handleShare} className="flex items-center justify-center rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900">Share summary</button>
             <button onClick={handleExport} disabled={isExporting} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-wait disabled:opacity-70">
-              {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}{isExporting ? 'Preparing report…' : 'Download full report'}
+              {isExporting ? 'Preparing report…' : 'Download full report'}
             </button>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:hidden">
-            <button onClick={handleShare} className="flex items-center justify-center gap-2 rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900"><Share2 className="h-5 w-5" /> Share summary</button>
+            <button onClick={handleShare} className="flex items-center justify-center rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900">Share summary</button>
             <button onClick={handleExport} disabled={isExporting} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-wait disabled:opacity-70">
-              {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Download className="h-5 w-5" />}{isExporting ? 'Preparing…' : 'Report'}
+              {isExporting ? 'Preparing…' : 'Report'}
             </button>
           </div>
         </article>
@@ -172,12 +171,12 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
             <table className="w-full text-left">
               <thead className="bg-[#173642] text-xs uppercase tracking-wider text-slate-400"><tr><th className="px-5 py-4">Section</th><th className="px-5 py-4">Entries</th><th className="px-5 py-4">Total</th><th className="px-5 py-4">Paid</th><th className="px-5 py-4">Due</th><th className="px-5 py-4"><span className="sr-only">Open</span></th></tr></thead>
               <tbody className="divide-y divide-slate-600/60">
-                {summaryRows.map((row) => <tr key={row.label} className="transition hover:bg-white/5"><td className="px-5 py-5 font-semibold">{row.label}</td><td className="px-5 py-5 text-slate-400">{row.entries}</td><td className="px-5 py-5 font-bold">{formatCurrency(row.total)}</td><td className="px-5 py-5 font-bold text-emerald-300">{formatCurrency(row.paid)}</td><td className="px-5 py-5 font-bold text-rose-300">{formatCurrency(row.due)}</td><td className="px-5 py-5 text-right"><button onClick={() => router.push(row.route)} className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold transition hover:bg-emerald-600">View →</button></td></tr>)}
+                {summaryRows.map((row) => <tr key={row.label} className="transition hover:bg-white/5"><td className="px-5 py-5 font-semibold">{row.label}</td><td className="px-5 py-5 text-slate-400">{row.entries}</td><td className="px-5 py-5 font-bold">{formatCurrency(row.total)}</td><td className="px-5 py-5 font-bold text-emerald-300">{formatCurrency(row.paid)}</td><td className="px-5 py-5 font-bold text-rose-300">{formatCurrency(row.due)}</td><td className="px-5 py-5 text-right"><button onClick={() => router.push(row.route)} className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold transition hover:bg-emerald-600">View</button></td></tr>)}
               </tbody>
             </table>
           </div>
           <div className="divide-y divide-slate-600/60 md:hidden">
-            {summaryRows.map((row) => { const Icon = row.icon; return <button key={row.label} onClick={() => router.push(row.route)} className="block w-full p-5 text-left transition hover:bg-white/5"><div className="flex items-center justify-between gap-3"><span className="flex items-center gap-3 font-bold"><Icon className="h-5 w-5 text-emerald-300" />{row.label}</span><ArrowRight className="h-4 w-4" /></div><p className="mt-2 text-xs text-slate-400">{row.entries}</p><div className="mt-3 grid grid-cols-3 gap-2 text-sm"><p><span className="block text-xs text-slate-500">Total</span><strong>{formatCurrency(row.total)}</strong></p><p><span className="block text-xs text-slate-500">Paid</span><strong className="text-emerald-300">{formatCurrency(row.paid)}</strong></p><p><span className="block text-xs text-slate-500">Due</span><strong className="text-rose-300">{formatCurrency(row.due)}</strong></p></div></button> })}
+            {summaryRows.map((row) => <button key={row.label} onClick={() => router.push(row.route)} className="block w-full p-5 text-left transition hover:bg-white/5"><div className="flex items-center justify-between gap-3"><span className="font-bold">{row.label}</span><span className="text-xs font-semibold text-emerald-300">View</span></div><p className="mt-2 text-xs text-slate-400">{row.entries}</p><div className="mt-3 grid grid-cols-3 gap-2 text-sm"><p><span className="block text-xs text-slate-500">Total</span><strong>{formatCurrency(row.total)}</strong></p><p><span className="block text-xs text-slate-500">Paid</span><strong className="text-emerald-300">{formatCurrency(row.paid)}</strong></p><p><span className="block text-xs text-slate-500">Due</span><strong className="text-rose-300">{formatCurrency(row.due)}</strong></p></div></button>)}
           </div>
         </article>
       </div>

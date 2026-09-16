@@ -28,7 +28,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* PWA-specific styles */
@@ -147,6 +147,11 @@ body {
   background: var(--app-bg);
 }
 
+.dashboard-shell #dashboard-year option {
+  color: #0f172a !important;
+  background: #ffffff !important;
+}
+
 .dashboard-shell > header {
   border-color: var(--app-border) !important;
   background: rgba(7, 27, 37, 0.96) !important;
@@ -170,22 +175,70 @@ body {
   background: var(--app-bg) !important;
 }
 
-.dashboard-shell > footer p,
-.dashboard-shell > footer a {
-  color: var(--app-muted) !important;
-}
-
 .dashboard-detail-page {
   color: #e2e8f0;
 }
 
+.dashboard-detail-page > div {
+  padding-bottom: 1.5rem;
+}
+
+.dashboard-detail-page > div > .grid:first-child {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 0.75rem !important;
+}
+
+.dashboard-detail-page > div > .grid:first-child > div {
+  min-width: 0;
+  padding: 1rem !important;
+  box-shadow: none !important;
+}
+
 .dashboard-detail-page > div:not(:first-of-type),
 .dashboard-detail-page :is(section, article, table, thead, tbody)[class*="bg-white"],
+.dashboard-detail-page div[class*="bg-white/"],
 .dashboard-detail-page :is(div, table, thead, tbody)[class*="from-blue-50"],
 .dashboard-detail-page :is(div, table, thead, tbody)[class*="from-gray-50"] {
   border-color: var(--app-border) !important;
   background-color: var(--app-surface) !important;
   background-image: none !important;
+}
+
+.dashboard-detail-page div[class*="bg-gray-100"] {
+  display: none !important;
+}
+
+.dashboard-detail-page h2[class*="text-transparent"] {
+  color: #f8fafc !important;
+  background-image: none !important;
+}
+
+.dashboard-detail-page svg {
+  display: none !important;
+}
+
+.dashboard-detail-page button[title]::after {
+  content: attr(title);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.dashboard-detail-page input[class*="pl-10"] {
+  padding-left: 1rem !important;
+}
+
+.dashboard-detail-page button[class*="from-blue"] {
+  background-color: #059669 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.dashboard-detail-page button[class*="from-green"] {
+  background-color: #059669 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .dashboard-detail-page > div > .grid:first-child > div {
@@ -245,6 +298,113 @@ body {
     margin-left: -1rem;
     margin-right: -1rem;
     border-radius: 0;
+  }
+
+  .dashboard-detail-page h1 {
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .dashboard-detail-page > div > .grid:first-child > div {
+    padding: 0.75rem !important;
+  }
+
+  .dashboard-detail-page > div > .grid:first-child h3 {
+    font-size: 0.7rem !important;
+  }
+
+  .dashboard-detail-page > div > .grid:first-child p {
+    margin-top: 0.2rem;
+    font-size: 0.95rem !important;
+  }
+
+  /* Compact shared search/add toolbar on every management page. */
+  .dashboard-detail-page > div > div:nth-child(2) {
+    padding: 0.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .dashboard-detail-page > div > div:nth-child(2) > div {
+    gap: 0.625rem !important;
+  }
+
+  .dashboard-detail-page > div > div:nth-child(2) h2 {
+    font-size: 1rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  .dashboard-detail-page > div > div:nth-child(2) > div > div {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100%;
+  }
+
+  .dashboard-detail-page > div > div:nth-child(2) input {
+    width: 100% !important;
+    height: 2.625rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .dashboard-detail-page > div > div:nth-child(2) button {
+    min-height: 2.625rem !important;
+    padding: 0.5rem 0.875rem !important;
+    white-space: nowrap;
+    font-size: 0.8125rem !important;
+  }
+
+  .dashboard-detail-page table {
+    min-width: 100% !important;
+    table-layout: fixed;
+  }
+
+  .dashboard-detail-page th,
+  .dashboard-detail-page td {
+    min-width: 0 !important;
+    padding: 0.75rem 0.5rem !important;
+    overflow: hidden;
+  }
+
+  .dashboard-detail-page th:nth-child(5),
+  .dashboard-detail-page td:nth-child(5),
+  .dashboard-detail-page th:nth-child(6),
+  .dashboard-detail-page td:nth-child(6),
+  .dashboard-detail-page th:nth-child(7),
+  .dashboard-detail-page td:nth-child(7) {
+    display: none;
+  }
+
+  .dashboard-detail-page table:has(th:nth-child(9)) th:nth-child(5),
+  .dashboard-detail-page table:has(th:nth-child(9)) td:nth-child(5) {
+    display: table-cell;
+  }
+
+  .dashboard-detail-page table:has(th:nth-child(9)) th:nth-child(8),
+  .dashboard-detail-page table:has(th:nth-child(9)) td:nth-child(8) {
+    display: none;
+  }
+
+  .dashboard-detail-page th:last-child,
+  .dashboard-detail-page td:last-child {
+    width: 4.75rem;
+  }
+
+  .dashboard-detail-page tbody td > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboard-detail-page tbody:has(td[colspan]) td {
+    height: auto !important;
+    padding: 2.5rem 1rem !important;
+  }
+
+  .dashboard-detail-page tbody:has(td[colspan]) td > div > div:first-child {
+    display: none;
   }
 }
 
