@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Analytics from '@/components/Analytics'
+import { useYear } from '@/context/YearContext'
 import type { 
   AuctionItem, 
   MembershipItem, 
   SpentItem, 
   DonationItem, 
-  DuesItem,
-  TabType 
+  DuesItem
 } from '@/types'
-import { TABS } from '@/utils/constants'
 
 export default function DashboardPage() {
+  const { selectedYear } = useYear()
   const [user, setUser] = useState<any>(null)
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
@@ -34,7 +34,7 @@ export default function DashboardPage() {
     if (user) {
       getAllDataForAnalytics()
     }
-  }, [user])
+  }, [user, selectedYear])
 
   // Function to load all data for analytics
   const getAllDataForAnalytics = async () => {
@@ -67,6 +67,7 @@ export default function DashboardPage() {
       .from('auction_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -83,6 +84,7 @@ export default function DashboardPage() {
       .from('membership_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -99,6 +101,7 @@ export default function DashboardPage() {
       .from('spent_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -115,6 +118,7 @@ export default function DashboardPage() {
       .from('donation_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -131,6 +135,7 @@ export default function DashboardPage() {
       .from('dues_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -154,7 +159,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Dashboard (Analytics / విశ్లేషణ)</h1>
+        <h1 className="text-xl font-bold text-gray-600">Dashboard (Analytics / విశ్లేషణ) — {selectedYear}</h1>
 
       <Analytics
         auctionItems={auctionItems}
@@ -162,6 +167,7 @@ export default function DashboardPage() {
         spentItems={spentItems}
         donationItems={donationItems}
         duesItems={duesItems}
+        year={selectedYear}
       />
     </div>
   )

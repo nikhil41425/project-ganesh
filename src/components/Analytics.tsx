@@ -12,6 +12,7 @@ interface AnalyticsProps {
   spentItems: any[]
   donationItems: any[]
   duesItems: any[]
+  year: number
 }
 
 interface ToastNotification {
@@ -26,7 +27,8 @@ export default function Analytics({
   membershipItems = [], 
   spentItems = [], 
   donationItems = [], 
-  duesItems = [] 
+  duesItems = [],
+  year
 }: AnalyticsProps) {
   
   const router = useRouter()
@@ -268,6 +270,10 @@ export default function Analytics({
         ))}
       </div>
       {/* Header with Export Buttons */}
+      <div className="flex items-center justify-between rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3">
+        <p className="text-sm font-medium text-indigo-700">Financial year</p>
+        <p className="text-lg font-bold text-indigo-900">{year}</p>
+      </div>
       <div className="flex justify-between items-center mb-6">
         <div className="w-full">
             <button

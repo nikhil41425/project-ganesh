@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Auction from '@/components/Auction'
+import { useYear } from '@/context/YearContext'
 
 // Define types for auction items
 interface AuctionItem {
@@ -15,11 +16,13 @@ interface AuctionItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
 
 export default function AuctionPage() {
+  const { selectedYear } = useYear()
   const [user, setUser] = useState<any>(null)
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,7 +40,7 @@ export default function AuctionPage() {
     if (user) {
       getAuctionItems(searchTerm)
     }
-  }, [user, searchTerm])
+  }, [user, searchTerm, selectedYear])
 
   const getUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -56,6 +59,7 @@ export default function AuctionPage() {
       .from('auction_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (search) {
@@ -83,7 +87,8 @@ export default function AuctionPage() {
         ...data, 
         paid,
         due,
-        user_id: user.id 
+        user_id: user.id,
+        year: selectedYear
       }])
 
     if (error) {
@@ -135,7 +140,7 @@ export default function AuctionPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Auction (సవాల్)</h1>
+        <h1 className="text-xl font-bold text-gray-600">Auction (సవాల్) — {selectedYear}</h1>
       
       <Auction
         items={auctionItems}

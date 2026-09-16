@@ -15,12 +15,13 @@ const supabase = createClient();
 export class DatabaseService<T extends { id: string; user_id: string }> {
   constructor(private tableName: string) {}
 
-  async getAll(userId: string): Promise<ApiResponse<T[]>> {
+  async getAll(userId: string, year: number): Promise<ApiResponse<T[]>> {
     try {
       const { data, error } = await supabase
         .from(this.tableName)
         .select('*')
         .eq('user_id', userId)
+        .eq('year', year)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

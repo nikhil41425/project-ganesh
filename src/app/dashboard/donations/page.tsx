@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Donations from '@/components/Donations'
+import { useYear } from '@/context/YearContext'
 
 // Define types for donation items
 interface DonationItem {
@@ -14,11 +15,13 @@ interface DonationItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
 
 export default function DonationsPage() {
+  const { selectedYear } = useYear()
   const [user, setUser] = useState<any>(null)
   const [donationItems, setDonationItems] = useState<DonationItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +39,7 @@ export default function DonationsPage() {
     if (user) {
       getDonationItems(searchTerm)
     }
-  }, [user, searchTerm])
+  }, [user, searchTerm, selectedYear])
 
   const getUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -55,6 +58,7 @@ export default function DonationsPage() {
       .from('donation_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (search) {
@@ -82,7 +86,8 @@ export default function DonationsPage() {
         ...data, 
         paid,
         due,
-        user_id: user.id 
+        user_id: user.id,
+        year: selectedYear
       }])
 
     if (error) {
@@ -134,7 +139,7 @@ export default function DonationsPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Donations (చంద)</h1>
+        <h1 className="text-xl font-bold text-gray-600">Donations (చంద) — {selectedYear}</h1>
       
       <Donations
         items={donationItems}

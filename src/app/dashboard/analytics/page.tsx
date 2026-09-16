@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Analytics from '@/components/Analytics'
+import { useYear } from '@/context/YearContext'
 
 // Define types for data items
 interface AuctionItem {
@@ -15,6 +16,7 @@ interface AuctionItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
@@ -27,6 +29,7 @@ interface MembershipItem {
   comment: string
   paid: number
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
@@ -39,6 +42,7 @@ interface SpentItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
@@ -51,6 +55,7 @@ interface DonationItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
@@ -63,11 +68,13 @@ interface DuesItem {
   due: number
   comment: string
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
 
 export default function AnalyticsPage() {
+  const { selectedYear } = useYear()
   const [user, setUser] = useState<any>(null)
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
@@ -87,7 +94,7 @@ export default function AnalyticsPage() {
     if (user) {
       getAllDataForAnalytics()
     }
-  }, [user])
+  }, [user, selectedYear])
 
   // Function to load all data for analytics
   const getAllDataForAnalytics = async () => {
@@ -120,6 +127,7 @@ export default function AnalyticsPage() {
       .from('auction_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -136,6 +144,7 @@ export default function AnalyticsPage() {
       .from('membership_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -152,6 +161,7 @@ export default function AnalyticsPage() {
       .from('spent_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -168,6 +178,7 @@ export default function AnalyticsPage() {
       .from('donation_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -184,6 +195,7 @@ export default function AnalyticsPage() {
       .from('dues_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -214,6 +226,7 @@ export default function AnalyticsPage() {
         spentItems={spentItems}
         donationItems={donationItems}
         duesItems={duesItems}
+        year={selectedYear}
       />
     </div>
   )

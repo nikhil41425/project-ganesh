@@ -2,6 +2,7 @@
 export interface BaseItem {
   id: string;
   user_id: string;
+  year: number;
   created_at: string;
   updated_at: string;
 }

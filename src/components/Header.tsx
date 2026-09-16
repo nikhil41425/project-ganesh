@@ -1,11 +1,12 @@
 'use client'
 
-import { LogOut, Download, Menu, X, ShoppingBag, Users, Receipt, Heart, DollarSign, BarChart3 } from 'lucide-react'
+import { LogOut, Download, Menu, X, ShoppingBag, Users, Receipt, Heart, DollarSign, BarChart3, CalendarDays } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { usePWAInstall } from '@/hooks/usePWAInstall'
 import PWAInstallModal from './PWAInstallModal'
+import { useYear } from '@/context/YearContext'
 
 interface HeaderProps {
   onLogout: () => void
@@ -16,6 +17,7 @@ export default function Header({ onLogout }: HeaderProps) {
   const [showInstallModal, setShowInstallModal] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
+  const { selectedYear, setSelectedYear, availableYears } = useYear()
   
   const router = useRouter()
   const pathname = usePathname()
@@ -131,6 +133,21 @@ export default function Header({ onLogout }: HeaderProps) {
               </h1>
             </div>
             <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700" htmlFor="dashboard-year">
+                <CalendarDays className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+                <span className="hidden sm:inline">Year</span>
+                <select
+                  id="dashboard-year"
+                  value={selectedYear}
+                  onChange={(event) => setSelectedYear(Number(event.target.value))}
+                  className="rounded-lg border border-gray-300 bg-white px-2 py-2 text-sm font-semibold text-gray-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  aria-label="Select financial year"
+                >
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </label>
               {/* Hamburger Menu Button for Mobile */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

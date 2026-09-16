@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Membership from '@/components/Membership'
+import { useYear } from '@/context/YearContext'
 
 // Define types for membership items
 interface MembershipItem {
@@ -14,11 +15,13 @@ interface MembershipItem {
   comment: string
   paid: number
   user_id: string
+  year: number
   created_at: string
   updated_at: string
 }
 
 export default function MembershipPage() {
+  const { selectedYear } = useYear()
   const [user, setUser] = useState<any>(null)
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +39,7 @@ export default function MembershipPage() {
     if (user) {
       getMembershipItems(searchTerm)
     }
-  }, [user, searchTerm])
+  }, [user, searchTerm, selectedYear])
 
   const getUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -55,6 +58,7 @@ export default function MembershipPage() {
       .from('membership_items')
       .select('*')
       .eq('user_id', user.id)
+      .eq('year', selectedYear)
       .order('created_at', { ascending: false })
 
     if (search) {
@@ -82,7 +86,8 @@ export default function MembershipPage() {
         ...data, 
         paid,
         due,
-        user_id: user.id 
+        user_id: user.id,
+        year: selectedYear
       }])
 
     if (error) {
@@ -134,7 +139,7 @@ export default function MembershipPage() {
 
   return (
     <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600 text-gary-600">Membership (సబ్యత్వం)</h1>
+        <h1 className="text-xl font-bold text-gray-600">Membership (సబ్యత్వం) — {selectedYear}</h1>
       
       <Membership
         items={membershipItems}
