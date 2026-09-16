@@ -15,6 +15,7 @@ interface ExportData {
   spentItems: SpentItem[]
   donationItems: DonationItem[]
   duesItems: DuesItem[]
+  year: number
   user?: any
 }
 

@@ -1,11 +1,5 @@
 import jsPDF from 'jspdf'
-import type { 
-  AuctionItem, 
-  MembershipItem, 
-  SpentItem, 
-  DonationItem, 
-  DuesItem 
-} from '@/types'
+import type { AuctionItem, DonationItem, DuesItem, MembershipItem, SpentItem } from '@/types'
 
 interface ExportData {
   auctionItems: AuctionItem[]
@@ -13,466 +7,272 @@ interface ExportData {
   spentItems: SpentItem[]
   donationItems: DonationItem[]
   duesItems: DuesItem[]
-  user?: any
+  year: number
 }
 
-export const exportAnalyticsToPDF = async (data: ExportData) => {
-  const pdf = new jsPDF('p', 'mm', 'a4')
-  
-  // Color palette for professional look
-  const colors = {
-    primary: [41, 98, 255] as [number, number, number],      // Blue
-    secondary: [76, 175, 80] as [number, number, number],    // Green
-    accent: [255, 152, 0] as [number, number, number],       // Orange
-    danger: [244, 67, 54] as [number, number, number],       // Red
-    dark: [33, 37, 41] as [number, number, number],          // Dark gray
-    light: [248, 249, 250] as [number, number, number],      // Light gray
-    white: [255, 255, 255] as [number, number, number],      // White
-    border: [220, 220, 220] as [number, number, number],     // Light border
-    headerBg: [248, 249, 250] as [number, number, number],   // Header background
-    alternateRow: [252, 252, 252] as [number, number, number] // Alternate row color
-  }
-  
-  // Helper function to safely convert to number
-  const safeNumber = (value: any): number => {
-    if (value === null || value === undefined || value === '') return 0
-    const num = Number(value)
-    return isNaN(num) ? 0 : num
-  }
+type FinancialItem = { amount: number; paid: number; due: number }
+type ReportRow = Array<string | number>
 
-  // Helper function to format currency
-  const formatCurrency = (amount: number): string => {
-    if (isNaN(amount) || !isFinite(amount)) return 'Rs. 0'
-    const roundedAmount = Math.round(amount)
-    // Use Rs. instead of ₹ symbol for better PDF compatibility
-    return `Rs. ${roundedAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
-  }
+const numberValue = (value: unknown) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
 
-  // Helper function to format date
-  const formatDate = (dateString: string): string => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-IN')
-    } catch {
-      return 'N/A'
-    }
-  }
+const sum = (items: FinancialItem[], field: keyof FinancialItem) =>
+  items.reduce((total, item) => total + numberValue(item[field]), 0)
 
-  // Page settings
+const money = (value: number) => `Rs. ${Math.round(value).toLocaleString('en-IN')}`
+
+const date = (value: string) => {
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? '-' : parsed.toLocaleDateString('en-IN')
+}
+
+export const exportAnalyticsToPDF = async (source: ExportData) => {
+  const { year } = source
+  const forYear = <T extends { year: number }>(items: T[]) => items.filter((item) => Number(item.year) === year)
+  const auctionItems = forYear(source.auctionItems)
+  const membershipItems = forYear(source.membershipItems)
+  const spentItems = forYear(source.spentItems)
+  const donationItems = forYear(source.donationItems)
+
+  const incomingItems: FinancialItem[] = [...membershipItems, ...auctionItems, ...donationItems]
+  const incomingTotal = sum(incomingItems, 'amount')
+  const collected = sum(incomingItems, 'paid')
+  const incomingDue = sum(incomingItems, 'due')
+  const expenseTotal = sum(spentItems, 'amount')
+  const expensePaid = sum(spentItems, 'paid')
+  const expenseDue = sum(spentItems, 'due')
+  const accountBalance = collected - expensePaid
+  const collectionProgress = incomingTotal > 0 ? (collected / incomingTotal) * 100 : 0
+  const paymentStatus = incomingItems.reduce(
+    (status, item) => {
+      if (numberValue(item.due) <= 0) status.paid += 1
+      else if (numberValue(item.paid) > 0) status.partial += 1
+      else status.due += 1
+      return status
+    },
+    { paid: 0, partial: 0, due: 0 }
+  )
+
+  const categories = [
+    { name: 'Membership', items: membershipItems, unit: 'people' },
+    { name: 'Expenses', items: spentItems, unit: 'items' },
+    { name: 'Auction', items: auctionItems, unit: 'items' },
+    { name: 'Donations', items: donationItems, unit: 'people' },
+  ]
+
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const margin = 15
-  let currentY = margin
+  const contentWidth = pageWidth - margin * 2
+  const footerTop = pageHeight - 15
+  let y = 0
 
-  // Function to add a new page if needed
-  const checkPageBreak = (requiredSpace: number) => {
-    if (currentY + requiredSpace > pageHeight - margin) {
-      pdf.addPage()
-      currentY = margin
-      return true
-    }
-    return false
+  const colors = {
+    navy: [7, 27, 37] as const,
+    panel: [16, 42, 54] as const,
+    teal: [52, 211, 153] as const,
+    cyan: [34, 211, 238] as const,
+    orange: [251, 146, 60] as const,
+    rose: [251, 113, 133] as const,
+    slate: [71, 85, 105] as const,
+    pale: [241, 245, 249] as const,
+    white: [255, 255, 255] as const,
+    ink: [15, 23, 42] as const,
   }
 
-  // Function to add header to each page
-  const addHeader = () => {
-    // Header background
-    pdf.setFillColor(...colors.headerBg)
-    pdf.rect(0, 0, pageWidth, 25, 'F')
-    
-    // Main title with enhanced typography
-    pdf.setFontSize(20)
+  const addPageHeader = () => {
+    pdf.setFillColor(...colors.navy)
+    pdf.rect(0, 0, pageWidth, 28, 'F')
+    pdf.setTextColor(...colors.white)
     pdf.setFont('helvetica', 'bold')
-    pdf.setTextColor(...colors.primary)
-    pdf.text('Friendz Youth', pageWidth / 2, 12, { align: 'center' })
-    
-    pdf.setFontSize(14)
-    pdf.setTextColor(...colors.dark)
-    pdf.text('Analytics Report', pageWidth / 2, 18, { align: 'center' })
-    
-    currentY = 30
-    
-    // Date and time info with better styling
-    pdf.setFontSize(9)
+    pdf.setFontSize(17)
+    pdf.text('Friendz Youth - Choller', margin, 12)
+    pdf.setFontSize(10)
     pdf.setFont('helvetica', 'normal')
-    pdf.setTextColor(...colors.dark)
-    const reportDate = `Generated on: ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}`
-    pdf.text(reportDate, pageWidth / 2, currentY, { align: 'center' })
-    currentY += 8
-    
-    // Decorative line with color
-    pdf.setDrawColor(...colors.primary)
-    pdf.setLineWidth(0.5)
-    pdf.line(margin, currentY, pageWidth - margin, currentY)
-    pdf.setDrawColor(0, 0, 0) // Reset to black
-    pdf.setLineWidth(0.2) // Reset line width
-    currentY += 12
+    pdf.text(`Annual Financial Report | ${year}`, margin, 20)
+    pdf.text(`Generated ${new Date().toLocaleString('en-IN')}`, pageWidth - margin, 20, { align: 'right' })
+    y = 36
   }
 
-  // Add header to first page
-  addHeader()
-
-  // Calculate totals for summary
-  const categoryTotals = [
-    { 
-      name: 'Auction Items',
-      total: data.auctionItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
-      paid: data.auctionItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
-      due: data.auctionItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
-      count: data.auctionItems.length
-    },
-    { 
-      name: 'Membership Items',
-      total: data.membershipItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
-      paid: data.membershipItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
-      due: data.membershipItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
-      count: data.membershipItems.length
-    },
-    { 
-      name: 'Expense Items',
-      total: data.spentItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
-      paid: data.spentItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
-      due: data.spentItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
-      count: data.spentItems.length
-    },
-    { 
-      name: 'Donation Items',
-      total: data.donationItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
-      paid: data.donationItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
-      due: data.donationItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
-      count: data.donationItems.length
-    },
-    { 
-      name: 'Dues Items',
-      total: data.duesItems.reduce((sum, item) => sum + safeNumber(item.amount), 0),
-      paid: data.duesItems.reduce((sum, item) => sum + safeNumber(item.paid), 0),
-      due: data.duesItems.reduce((sum, item) => sum + safeNumber(item.due), 0),
-      count: data.duesItems.length
-    }
-  ]
-
-  const overallStats = {
-    totalAmount: categoryTotals.reduce((sum, cat) => sum + cat.total, 0),
-    totalPaid: categoryTotals.reduce((sum, cat) => sum + cat.paid, 0),
-    totalDue: categoryTotals.reduce((sum, cat) => sum + cat.due, 0),
-    totalItems: categoryTotals.reduce((sum, cat) => sum + cat.count, 0)
+  const newPage = () => {
+    pdf.addPage()
+    addPageHeader()
   }
 
-  // Add Summary Section with enhanced styling
-  pdf.setFontSize(16)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(...colors.primary)
-  pdf.text('EXECUTIVE SUMMARY', margin, currentY)
-  currentY += 12
-
-  // Summary cards background
-  const cardHeight = 50
-  pdf.setFillColor(...colors.light)
-  pdf.roundedRect(margin, currentY, pageWidth - 2 * margin, cardHeight, 3, 3, 'F')
-  
-  // Summary statistics with better layout
-  pdf.setFontSize(11)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(...colors.dark)
-  
-  const summaryY = currentY + 8
-  const col1X = margin + 10
-  const col2X = margin + (pageWidth - 2 * margin) / 2 + 10
-  
-  // Left column
-  pdf.text('Total Amount:', col1X, summaryY)
-  pdf.setTextColor(...colors.secondary)
-  pdf.text(formatCurrency(overallStats.totalAmount), col1X, summaryY + 8)
-  
-  pdf.setTextColor(...colors.dark)
-  pdf.text('Total Paid:', col1X, summaryY + 20)
-  pdf.setTextColor(...colors.secondary)
-  pdf.text(formatCurrency(overallStats.totalPaid), col1X, summaryY + 28)
-  
-  // Right column
-  pdf.setTextColor(...colors.dark)
-  pdf.text('Total Due:', col2X, summaryY)
-  pdf.setTextColor(...colors.danger)
-  pdf.text(formatCurrency(overallStats.totalDue), col2X, summaryY + 8)
-  
-  pdf.setTextColor(...colors.dark)
-  pdf.text('Total Items:', col2X, summaryY + 20)
-  pdf.setTextColor(...colors.accent)
-  pdf.text(overallStats.totalItems.toString(), col2X, summaryY + 28)
-
-  currentY += cardHeight + 15
-
-  // Category breakdown with enhanced table design
-  pdf.setFontSize(14)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(...colors.primary)
-  pdf.text('CATEGORY BREAKDOWN', margin, currentY)
-  currentY += 12
-
-  // Table header with background
-  const tableStartY = currentY
-  const headerHeight = 8
-  const rowHeight = 7
-  const colWidths = [50, 20, 35, 35, 35]
-  const colPositions = [margin]
-  for (let i = 1; i < colWidths.length; i++) {
-    colPositions[i] = colPositions[i - 1] + colWidths[i - 1]
+  const ensureSpace = (height: number) => {
+    if (y + height > footerTop) newPage()
   }
 
-  // Header background
-  pdf.setFillColor(...colors.primary)
-  pdf.rect(margin, currentY, pageWidth - 2 * margin, headerHeight, 'F')
-  
-  // Header text
-  pdf.setFontSize(10)
-  pdf.setFont('helvetica', 'bold')
-  pdf.setTextColor(...colors.white)
-  const headers = ['Category', 'Count', 'Total', 'Paid', 'Due']
-  headers.forEach((header, index) => {
-    pdf.text(header, colPositions[index] + 2, currentY + 5)
-  })
-  currentY += headerHeight
-
-  // Table rows with alternating colors
-  pdf.setFont('helvetica', 'normal')
-  categoryTotals.forEach((category, index) => {
-    // Alternate row background
-    if (index % 2 === 0) {
-      pdf.setFillColor(...colors.alternateRow)
-      pdf.rect(margin, currentY, pageWidth - 2 * margin, rowHeight, 'F')
-    }
-    
-    pdf.setTextColor(...colors.dark)
-    pdf.text(category.name, colPositions[0] + 2, currentY + 5)
-    pdf.text(category.count.toString(), colPositions[1] + 2, currentY + 5)
-    
-    // Color-coded amounts
-    pdf.setTextColor(...colors.dark)
-    pdf.text(formatCurrency(category.total), colPositions[2] + 2, currentY + 5)
-    
-    pdf.setTextColor(...colors.secondary)
-    pdf.text(formatCurrency(category.paid), colPositions[3] + 2, currentY + 5)
-    
-    pdf.setTextColor(...colors.danger)
-    pdf.text(formatCurrency(category.due), colPositions[4] + 2, currentY + 5)
-    
-    currentY += rowHeight
-  })
-
-  // Table border
-  pdf.setDrawColor(...colors.border)
-  pdf.setLineWidth(0.3)
-  pdf.rect(margin, tableStartY, pageWidth - 2 * margin, headerHeight + (categoryTotals.length * rowHeight))
-
-  currentY += 15
-
-  // Function to create detailed table for each category with enhanced styling
-  const createDetailedTable = (title: string, items: any[], columns: string[], getValue: (item: any, column: string) => string) => {
-    checkPageBreak(25)
-    
-    // Section title with colored background
-    pdf.setFillColor(...colors.light)
-    pdf.rect(margin, currentY - 2, pageWidth - 2 * margin, 12, 'F')
-    
-    pdf.setFontSize(14)
+  const sectionTitle = (title: string, subtitle?: string) => {
+    ensureSpace(subtitle ? 19 : 13)
+    pdf.setFillColor(...colors.panel)
+    pdf.roundedRect(margin, y, contentWidth, subtitle ? 16 : 11, 2, 2, 'F')
+    pdf.setTextColor(...colors.white)
     pdf.setFont('helvetica', 'bold')
-    pdf.setTextColor(...colors.primary)
-    pdf.text(title, margin + 5, currentY + 6)
-    currentY += 15
+    pdf.setFontSize(11)
+    pdf.text(title, margin + 4, y + 7)
+    if (subtitle) {
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(8)
+      pdf.setTextColor(203, 213, 225)
+      pdf.text(subtitle, margin + 4, y + 12)
+    }
+    y += subtitle ? 20 : 15
+  }
 
-    if (items.length === 0) {
-      pdf.setFontSize(10)
+  const metricGrid = (metrics: Array<{ label: string; value: string; color?: readonly [number, number, number] }>) => {
+    const columns = 2
+    const gap = 4
+    const cardWidth = (contentWidth - gap) / columns
+    const cardHeight = 22
+    metrics.forEach((metric, index) => {
+      if (index % columns === 0) ensureSpace(cardHeight)
+      const x = margin + (index % columns) * (cardWidth + gap)
+      const rowY = y
+      pdf.setFillColor(...colors.pale)
+      pdf.roundedRect(x, rowY, cardWidth, cardHeight, 2, 2, 'F')
+      pdf.setTextColor(...colors.slate)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(8)
+      pdf.text(metric.label.toUpperCase(), x + 4, rowY + 7)
+      pdf.setTextColor(...(metric.color ?? colors.ink))
+      pdf.setFontSize(14)
+      pdf.text(metric.value, x + 4, rowY + 16)
+      if (index % columns === columns - 1 || index === metrics.length - 1) y += cardHeight + 4
+    })
+  }
+
+  const drawTable = (title: string, headers: string[], rows: ReportRow[], widths: number[]) => {
+    sectionTitle(title, `${rows.length} record${rows.length === 1 ? '' : 's'} for ${year}`)
+    if (rows.length === 0) {
+      pdf.setTextColor(...colors.slate)
       pdf.setFont('helvetica', 'italic')
-      pdf.setTextColor(...colors.dark)
-      pdf.text('No items found', margin + 5, currentY)
-      currentY += 20
+      pdf.setFontSize(9)
+      pdf.text(`No ${title.toLowerCase()} recorded for ${year}.`, margin + 2, y + 3)
+      y += 11
       return
     }
 
-    // Calculate column widths dynamically
-    const tableWidth = pageWidth - 2 * margin
-    const colWidth = tableWidth / columns.length
-    const headerHeight = 8
-    const rowHeight = 6
-    
-    // Table header with gradient-like effect
-    pdf.setFillColor(...colors.primary)
-    pdf.rect(margin, currentY, tableWidth, headerHeight, 'F')
-    
-    // Header text
-    pdf.setFontSize(9)
-    pdf.setFont('helvetica', 'bold')
-    pdf.setTextColor(...colors.white)
-    columns.forEach((col, index) => {
-      const xPos = margin + (index * colWidth) + 2
-      pdf.text(col, xPos, currentY + 5)
-    })
-    currentY += headerHeight
-
-    // Table rows with enhanced styling
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(8)
-    
-    items.forEach((item, itemIndex) => {
-      checkPageBreak(rowHeight + 2)
-      
-      // Alternate row background
-      if (itemIndex % 2 === 0) {
-        pdf.setFillColor(...colors.alternateRow)
-        pdf.rect(margin, currentY, tableWidth, rowHeight, 'F')
-      }
-      
-      columns.forEach((col, colIndex) => {
-        const value = getValue(item, col)
-        let displayText = value.length > 18 ? value.substring(0, 18) + '...' : value
-        const xPos = margin + (colIndex * colWidth) + 2
-        
-        // Color coding for specific columns
-        if (col === 'Amount' || col === 'Total') {
-          pdf.setTextColor(...colors.dark)
-        } else if (col === 'Paid') {
-          pdf.setTextColor(...colors.secondary)
-        } else if (col === 'Due') {
-          pdf.setTextColor(...colors.danger)
-        } else {
-          pdf.setTextColor(...colors.dark)
-        }
-        
-        pdf.text(displayText, xPos, currentY + 4)
+    const drawHeader = () => {
+      ensureSpace(10)
+      pdf.setFillColor(...colors.slate)
+      pdf.rect(margin, y, contentWidth, 9, 'F')
+      pdf.setTextColor(...colors.white)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(7.5)
+      let x = margin
+      headers.forEach((header, index) => {
+        pdf.text(header, x + 2, y + 6)
+        x += widths[index]
       })
-      currentY += rowHeight
+      y += 9
+    }
+
+    drawHeader()
+    rows.forEach((row, rowIndex) => {
+      const cells = row.map((value, index) => pdf.splitTextToSize(String(value ?? '-'), widths[index] - 4) as string[])
+      const lines = Math.max(...cells.map((cell) => cell.length), 1)
+      const rowHeight = Math.max(8, lines * 3.5 + 3)
+      if (y + rowHeight > footerTop) {
+        newPage()
+        drawHeader()
+      }
+      if (rowIndex % 2 === 0) {
+        pdf.setFillColor(248, 250, 252)
+        pdf.rect(margin, y, contentWidth, rowHeight, 'F')
+      }
+      pdf.setDrawColor(226, 232, 240)
+      pdf.line(margin, y + rowHeight, pageWidth - margin, y + rowHeight)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(7.5)
+      let x = margin
+      cells.forEach((cell, index) => {
+        const header = headers[index]
+        if (header === 'Paid') pdf.setTextColor(5, 150, 105)
+        else if (header === 'Due') pdf.setTextColor(225, 29, 72)
+        else pdf.setTextColor(...colors.ink)
+        pdf.text(cell, x + 2, y + 5)
+        x += widths[index]
+      })
+      y += rowHeight
     })
-
-    // Table border
-    pdf.setDrawColor(...colors.border)
-    pdf.setLineWidth(0.3)
-    const tableHeight = headerHeight + (items.length * rowHeight)
-    pdf.rect(margin, currentY - tableHeight, tableWidth, tableHeight)
-    
-    // Reset colors
-    pdf.setTextColor(0, 0, 0)
-    pdf.setDrawColor(0, 0, 0)
-    pdf.setLineWidth(0.2)
-
-    currentY += 15
+    y += 7
   }
 
-  // Auction Items Details
-  createDetailedTable(
-    'AUCTION ITEMS DETAILS',
-    data.auctionItems,
+  addPageHeader()
+  sectionTitle('FINANCIAL OVERVIEW', 'Income = Membership + Auction + Donations | Outgoing = Expenses')
+  metricGrid([
+    { label: 'Account balance', value: money(accountBalance), color: accountBalance >= 0 ? colors.cyan : colors.rose },
+    { label: 'Incoming total', value: money(incomingTotal) },
+    { label: 'Collected', value: money(collected), color: colors.teal },
+    { label: 'Incoming due', value: money(incomingDue), color: colors.orange },
+    { label: 'Expenses total', value: money(expenseTotal) },
+    { label: 'Expenses paid', value: money(expensePaid), color: colors.rose },
+    { label: 'Expenses due', value: money(expenseDue), color: colors.rose },
+    { label: 'Collection progress', value: `${collectionProgress.toFixed(1)}%`, color: colors.teal },
+  ])
+
+  sectionTitle('INCOMING PAYMENT STATUS', `${incomingItems.length} income records`)
+  metricGrid([
+    { label: 'Fully paid', value: String(paymentStatus.paid), color: colors.teal },
+    { label: 'Partially paid', value: String(paymentStatus.partial), color: colors.orange },
+    { label: 'Unpaid / due', value: String(paymentStatus.due), color: colors.rose },
+    { label: 'Total records', value: String(incomingItems.length) },
+  ])
+
+  sectionTitle('CATEGORY SUMMARY', `All dashboard sections for ${year}`)
+  drawTable(
+    'SUMMARY BY SECTION',
+    ['Section', 'Entries', 'Total', 'Paid', 'Due'],
+    categories.map((category) => [
+      category.name,
+      `${category.items.length} ${category.unit}`,
+      money(sum(category.items, 'amount')),
+      money(sum(category.items, 'paid')),
+      money(sum(category.items, 'due')),
+    ]),
+    [40, 30, 37, 37, 36]
+  )
+
+  drawTable(
+    'MEMBERSHIP DETAILS',
+    ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
+    membershipItems.map((item) => [item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [40, 25, 25, 25, 45, 20]
+  )
+  drawTable(
+    'AUCTION DETAILS',
     ['Name', 'Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    (item, column) => {
-      switch (column) {
-        case 'Name': return item.name || 'N/A'
-        case 'Item': return item.item || 'N/A'
-        case 'Amount': return formatCurrency(safeNumber(item.amount))
-        case 'Paid': return formatCurrency(safeNumber(item.paid))
-        case 'Due': return formatCurrency(safeNumber(item.due))
-        case 'Comment': return item.comment || 'N/A'
-        case 'Date': return formatDate(item.created_at)
-        default: return 'N/A'
-      }
-    }
+    auctionItems.map((item) => [item.name, item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [30, 30, 24, 24, 24, 30, 18]
   )
-
-  // Membership Items Details
-  createDetailedTable(
-    'MEMBERSHIP ITEMS DETAILS',
-    data.membershipItems,
+  drawTable(
+    'DONATION DETAILS',
     ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    (item, column) => {
-      switch (column) {
-        case 'Name': return item.name || 'N/A'
-        case 'Amount': return formatCurrency(safeNumber(item.amount))
-        case 'Paid': return formatCurrency(safeNumber(item.paid))
-        case 'Due': return formatCurrency(safeNumber(item.due))
-        case 'Comment': return item.comment || 'N/A'
-        case 'Date': return formatDate(item.created_at)
-        default: return 'N/A'
-      }
-    }
+    donationItems.map((item) => [item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [40, 25, 25, 25, 45, 20]
   )
-
-  // Expense Items Details
-  createDetailedTable(
-    'EXPENSE ITEMS DETAILS',
-    data.spentItems,
+  drawTable(
+    'EXPENSE DETAILS',
     ['Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    (item, column) => {
-      switch (column) {
-        case 'Item': return item.item || 'N/A'
-        case 'Amount': return formatCurrency(safeNumber(item.amount))
-        case 'Paid': return formatCurrency(safeNumber(item.paid))
-        case 'Due': return formatCurrency(safeNumber(item.due))
-        case 'Comment': return item.comment || 'N/A'
-        case 'Date': return formatDate(item.created_at)
-        default: return 'N/A'
-      }
-    }
+    spentItems.map((item) => [item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [40, 25, 25, 25, 45, 20]
   )
 
-  // Donation Items Details
-  createDetailedTable(
-    'DONATION ITEMS DETAILS',
-    data.donationItems,
-    ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    (item, column) => {
-      switch (column) {
-        case 'Name': return item.name || 'N/A'
-        case 'Amount': return formatCurrency(safeNumber(item.amount))
-        case 'Paid': return formatCurrency(safeNumber(item.paid))
-        case 'Due': return formatCurrency(safeNumber(item.due))
-        case 'Comment': return item.comment || 'N/A'
-        case 'Date': return formatDate(item.created_at)
-        default: return 'N/A'
-      }
-    }
-  )
-
-  // Dues Items Details
-  createDetailedTable(
-    'DUES ITEMS DETAILS',
-    data.duesItems,
-    ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    (item, column) => {
-      switch (column) {
-        case 'Name': return item.name || 'N/A'
-        case 'Amount': return formatCurrency(safeNumber(item.amount))
-        case 'Paid': return formatCurrency(safeNumber(item.paid))
-        case 'Due': return formatCurrency(safeNumber(item.due))
-        case 'Comment': return item.comment || 'N/A'
-        case 'Date': return formatDate(item.created_at)
-        default: return 'N/A'
-      }
-    }
-  )
-
-  // Add enhanced footer with page numbers and branding
   const totalPages = pdf.getNumberOfPages()
-  for (let i = 1; i <= totalPages; i++) {
-    pdf.setPage(i)
-    
-    // Footer background
-    pdf.setFillColor(...colors.light)
-    pdf.rect(0, pageHeight - 15, pageWidth, 15, 'F')
-    
-    // Footer content
-    pdf.setFontSize(8)
+  for (let page = 1; page <= totalPages; page += 1) {
+    pdf.setPage(page)
+    pdf.setFillColor(...colors.navy)
+    pdf.rect(0, footerTop, pageWidth, 15, 'F')
+    pdf.setTextColor(203, 213, 225)
     pdf.setFont('helvetica', 'normal')
-    pdf.setTextColor(...colors.dark)
-    
-    // Left side - Company name
-    pdf.text('Friendz Youth - Analytics Report', margin, pageHeight - 6)
-    
-    // Right side - Page numbers
-    pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 6, { align: 'right' })
-    
-    // Center - Generation timestamp
-    const timestamp = new Date().toLocaleString('en-IN')
-    pdf.text(`Generated: ${timestamp}`, pageWidth / 2, pageHeight - 6, { align: 'center' })
+    pdf.setFontSize(8)
+    pdf.text(`Friendz Youth - Choller | ${year}`, margin, pageHeight - 6)
+    pdf.text(`Page ${page} of ${totalPages}`, pageWidth - margin, pageHeight - 6, { align: 'right' })
   }
 
-  // Save the PDF
-  const fileName = `Friendz_Youth_Analytics_${new Date().toISOString().split('T')[0]}.pdf`
-  pdf.save(fileName)
+  pdf.save(`Friendz_Youth_Financial_Report_${year}.pdf`)
 }

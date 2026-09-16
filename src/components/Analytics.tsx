@@ -76,7 +76,7 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      await exportAnalyticsToPDF({ auctionItems, membershipItems, spentItems, donationItems, duesItems })
+      await exportAnalyticsToPDF({ auctionItems, membershipItems, spentItems, donationItems, duesItems, year })
     } finally {
       setIsExporting(false)
     }
