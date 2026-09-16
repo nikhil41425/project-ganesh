@@ -51,7 +51,7 @@ export default function DashboardLayout({
 
   return (
     <YearProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="dashboard-shell min-h-screen bg-[#071b25] text-slate-100">
         <Header onLogout={handleSignOut} />
 
         {/* Main Content */}

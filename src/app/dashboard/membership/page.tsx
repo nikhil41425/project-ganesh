@@ -138,8 +138,8 @@ export default function MembershipPage() {
   }
 
   return (
-    <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Membership (సబ్యత్వం) — {selectedYear}</h1>
+    <div className="dashboard-detail-page space-y-6">
+        <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Membership (సబ్యత్వం) — {selectedYear}</h1>
       
       <Membership
         items={membershipItems}

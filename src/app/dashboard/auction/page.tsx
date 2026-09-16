@@ -139,8 +139,8 @@ export default function AuctionPage() {
   }
 
   return (
-    <div className="space-y-6">
-        <h1 className="text-xl font-bold text-gray-600">Auction (సవాల్) — {selectedYear}</h1>
+    <div className="dashboard-detail-page space-y-6">
+        <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Auction (సవాల్) — {selectedYear}</h1>
       
       <Auction
         items={auctionItems}
