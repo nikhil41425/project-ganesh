@@ -9,8 +9,7 @@ import type {
   AuctionItem, 
   MembershipItem, 
   SpentItem, 
-  DonationItem, 
-  DuesItem
+  DonationItem
 } from '@/types'
 
 export default function DashboardPage() {
@@ -20,7 +19,6 @@ export default function DashboardPage() {
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
   const [spentItems, setSpentItems] = useState<SpentItem[]>([])
   const [donationItems, setDonationItems] = useState<DonationItem[]>([])
-  const [duesItems, setDuesItems] = useState<DuesItem[]>([])
   const supabase = createClient()
 
   useEffect(() => {
@@ -34,8 +32,7 @@ export default function DashboardPage() {
       getAuctionItems(),
       getMembershipItems(),
       getSpentItems(),
-      getDonationItems(),
-      getDuesItems()
+      getDonationItems()
     ])
   }
 
@@ -103,22 +100,6 @@ export default function DashboardPage() {
     }
   }
 
-  const getDuesItems = async () => {
-    let query = supabase
-      .from('dues_items')
-      .select('*')
-      .eq('year', selectedYear)
-      .order('created_at', { ascending: false })
-    if (user) query = query.eq('user_id', user.id)
-    const { data, error } = await query
-
-    if (error) {
-      console.error('Error fetching dues items:', error)
-    } else {
-      setDuesItems(data || [])
-    }
-  }
-
   return (
     <div>
       <Analytics
@@ -126,7 +107,6 @@ export default function DashboardPage() {
         membershipItems={membershipItems}
         spentItems={spentItems}
         donationItems={donationItems}
-        duesItems={duesItems}
         year={selectedYear}
       />
     </div>

@@ -1,12 +1,11 @@
 import jsPDF from 'jspdf'
-import type { AuctionItem, DonationItem, DuesItem, MembershipItem, SpentItem } from '@/types'
+import type { AuctionItem, DonationItem, MembershipItem, SpentItem } from '@/types'
 
 interface ExportData {
   auctionItems: AuctionItem[]
   membershipItems: MembershipItem[]
   spentItems: SpentItem[]
   donationItems: DonationItem[]
-  duesItems: DuesItem[]
   year: number
 }
 
@@ -28,6 +27,17 @@ const date = (value: string) => {
   return Number.isNaN(parsed.getTime()) ? '-' : parsed.toLocaleDateString('en-IN')
 }
 
+const paymentStatus = (item: FinancialItem) => {
+  if (numberValue(item.due) <= 0) return 'Paid'
+  if (numberValue(item.paid) > 0) return 'Partially paid'
+  return 'Due'
+}
+
+const statusSorted = <T extends FinancialItem>(items: T[]) => {
+  const rank = { Due: 0, 'Partially paid': 1, Paid: 2 }
+  return [...items].sort((a, b) => rank[paymentStatus(a)] - rank[paymentStatus(b)])
+}
+
 export const exportAnalyticsToPDF = async (source: ExportData) => {
   const { year } = source
   const forYear = <T extends { year: number }>(items: T[]) => items.filter((item) => Number(item.year) === year)
@@ -45,7 +55,7 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
   const expenseDue = sum(spentItems, 'due')
   const accountBalance = collected - expensePaid
   const collectionProgress = incomingTotal > 0 ? (collected / incomingTotal) * 100 : 0
-  const paymentStatus = incomingItems.reduce(
+  const paymentStatusCounts = incomingItems.reduce(
     (status, item) => {
       if (numberValue(item.due) <= 0) status.paid += 1
       else if (numberValue(item.paid) > 0) status.partial += 1
@@ -86,14 +96,16 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
   const addPageHeader = () => {
     pdf.setFillColor(...colors.navy)
     pdf.rect(0, 0, pageWidth, 28, 'F')
+    pdf.setFillColor(...colors.teal)
+    pdf.rect(0, 0, 5, 28, 'F')
     pdf.setTextColor(...colors.white)
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(17)
-    pdf.text('Friendz Youth - Choller', margin, 12)
+    pdf.text('FRIENDZ YOUTH - CHOLLER', margin, 12)
     pdf.setFontSize(10)
     pdf.setFont('helvetica', 'normal')
     pdf.text(`Annual Financial Report | ${year}`, margin, 20)
-    pdf.text(`Generated ${new Date().toLocaleString('en-IN')}`, pageWidth - margin, 20, { align: 'right' })
+    pdf.text(`Prepared ${new Date().toLocaleDateString('en-IN')}`, pageWidth - margin, 20, { align: 'right' })
     y = 36
   }
 
@@ -146,6 +158,8 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
   }
 
   const drawTable = (title: string, headers: string[], rows: ReportRow[], widths: number[]) => {
+    // Keep the section heading, table header and at least one row together.
+    ensureSpace(rows.length > 0 ? 38 : 30)
     sectionTitle(title, `${rows.length} record${rows.length === 1 ? '' : 's'} for ${year}`)
     if (rows.length === 0) {
       pdf.setTextColor(...colors.slate)
@@ -180,10 +194,14 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
         newPage()
         drawHeader()
       }
-      if (rowIndex % 2 === 0) {
-        pdf.setFillColor(248, 250, 252)
-        pdf.rect(margin, y, contentWidth, rowHeight, 'F')
-      }
+      const statusIndex = headers.indexOf('Status')
+      const status = statusIndex >= 0 ? String(row[statusIndex]) : ''
+      if (status === 'Paid') pdf.setFillColor(236, 253, 245)
+      else if (status === 'Partially paid') pdf.setFillColor(255, 251, 235)
+      else if (status === 'Due') pdf.setFillColor(255, 241, 242)
+      else if (rowIndex % 2 === 0) pdf.setFillColor(248, 250, 252)
+      else pdf.setFillColor(255, 255, 255)
+      pdf.rect(margin, y, contentWidth, rowHeight, 'F')
       pdf.setDrawColor(226, 232, 240)
       pdf.line(margin, y + rowHeight, pageWidth - margin, y + rowHeight)
       pdf.setFont('helvetica', 'normal')
@@ -191,7 +209,10 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
       let x = margin
       cells.forEach((cell, index) => {
         const header = headers[index]
-        if (header === 'Paid') pdf.setTextColor(5, 150, 105)
+        if (header === 'Status' && String(row[index]) === 'Paid') pdf.setTextColor(5, 150, 105)
+        else if (header === 'Status' && String(row[index]) === 'Partially paid') pdf.setTextColor(217, 119, 6)
+        else if (header === 'Status' && String(row[index]) === 'Due') pdf.setTextColor(225, 29, 72)
+        else if (header === 'Paid') pdf.setTextColor(5, 150, 105)
         else if (header === 'Due') pdf.setTextColor(225, 29, 72)
         else pdf.setTextColor(...colors.ink)
         pdf.text(cell, x + 2, y + 5)
@@ -217,9 +238,9 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
 
   sectionTitle('INCOMING PAYMENT STATUS', `${incomingItems.length} income records`)
   metricGrid([
-    { label: 'Fully paid', value: String(paymentStatus.paid), color: colors.teal },
-    { label: 'Partially paid', value: String(paymentStatus.partial), color: colors.orange },
-    { label: 'Unpaid / due', value: String(paymentStatus.due), color: colors.rose },
+    { label: 'Fully paid', value: String(paymentStatusCounts.paid), color: colors.teal },
+    { label: 'Partially paid', value: String(paymentStatusCounts.partial), color: colors.orange },
+    { label: 'Unpaid / due', value: String(paymentStatusCounts.due), color: colors.rose },
     { label: 'Total records', value: String(incomingItems.length) },
   ])
 
@@ -239,27 +260,27 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
 
   drawTable(
     'MEMBERSHIP DETAILS',
-    ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    membershipItems.map((item) => [item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
-    [40, 25, 25, 25, 45, 20]
+    ['Status', 'Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
+    statusSorted(membershipItems).map((item) => [paymentStatus(item), item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [26, 32, 23, 23, 23, 35, 18]
   )
   drawTable(
     'AUCTION DETAILS',
-    ['Name', 'Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    auctionItems.map((item) => [item.name, item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
-    [30, 30, 24, 24, 24, 30, 18]
+    ['Status', 'Name', 'Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
+    statusSorted(auctionItems).map((item) => [paymentStatus(item), item.name, item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [25, 26, 26, 21, 21, 21, 24, 16]
   )
   drawTable(
     'DONATION DETAILS',
-    ['Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    donationItems.map((item) => [item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
-    [40, 25, 25, 25, 45, 20]
+    ['Status', 'Name', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
+    statusSorted(donationItems).map((item) => [paymentStatus(item), item.name, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [26, 32, 23, 23, 23, 35, 18]
   )
   drawTable(
     'EXPENSE DETAILS',
-    ['Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
-    spentItems.map((item) => [item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
-    [40, 25, 25, 25, 45, 20]
+    ['Status', 'Item', 'Amount', 'Paid', 'Due', 'Comment', 'Date'],
+    statusSorted(spentItems).map((item) => [paymentStatus(item), item.item, money(item.amount), money(item.paid), money(item.due), item.comment || '-', date(item.created_at)]),
+    [26, 32, 23, 23, 23, 35, 18]
   )
 
   const totalPages = pdf.getNumberOfPages()

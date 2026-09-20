@@ -66,33 +66,20 @@ const testData = {
       created_at: '2024-01-14T16:30:00Z',
       updated_at: '2024-01-14T16:30:00Z'
     }
-  ],
-  duesItems: [
-    {
-      id: '6',
-      user_id: 'test',
-      name: 'Carol Brown',
-      amount: 750,
-      paid: 0,
-      due: 750,
-      comment: 'Monthly dues',
-      created_at: '2024-01-13T08:20:00Z',
-      updated_at: '2024-01-13T08:20:00Z'
-    }
   ]
 }
 
 // Expected calculations for verification:
-// Total Amount: 5000 + 8000 + 1200 + 500 + 2500 + 750 = 17,950
-// Total Paid: 3000 + 8000 + 1200 + 500 + 1500 + 0 = 14,200
-// Total Due: 2000 + 0 + 0 + 0 + 1000 + 750 = 3,750
-// Total Items: 6
+// Total Amount: 5000 + 8000 + 1200 + 500 + 2500 = 17,200
+// Total Paid: 3000 + 8000 + 1200 + 500 + 1500 = 14,200
+// Total Due: 2000 + 0 + 0 + 0 + 1000 = 3,000
+// Total Items: 5
 
 console.log('Test data for PDF export:')
 console.log('Expected totals:')
-console.log('- Total Amount: ₹17,950')
+console.log('- Total Amount: ₹17,200')
 console.log('- Total Paid: ₹14,200')
-console.log('- Total Due: ₹3,750')
-console.log('- Total Items: 6')
+console.log('- Total Due: ₹3,000')
+console.log('- Total Items: 5')
 
 export { testData }

@@ -4,8 +4,7 @@ import type {
   AuctionItem, 
   MembershipItem, 
   SpentItem, 
-  DonationItem, 
-  DuesItem,
+  DonationItem,
   ApiResponse 
 } from '@/types';
 
@@ -82,7 +81,6 @@ export const auctionService = new DatabaseService<AuctionItem>(TABLES.AUCTION_IT
 export const membershipService = new DatabaseService<MembershipItem>(TABLES.MEMBERSHIP_ITEMS);
 export const expensesService = new DatabaseService<SpentItem>(TABLES.SPENT_ITEMS);
 export const donationsService = new DatabaseService<DonationItem>(TABLES.DONATION_ITEMS);
-export const duesService = new DatabaseService<DuesItem>(TABLES.DUES_ITEMS);
 
 // Analytics helper functions
 export const calculateTotals = (items: Array<{ amount: number; paid: number }>) => {

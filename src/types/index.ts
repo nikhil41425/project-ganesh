@@ -40,14 +40,6 @@ export interface DonationItem extends BaseItem {
   comment: string;
 }
 
-export interface DuesItem extends BaseItem {
-  name: string;
-  amount: number;
-  paid: number;
-  due: number;
-  comment: string;
-}
-
 // Form Types
 export interface ItemFormData {
   name?: string;
@@ -82,4 +74,4 @@ export interface ApiResponse<T> {
 }
 
 // Utility Types
-export type TabType = 'auction' | 'membership' | 'expenses' | 'donations' | 'dues' | 'analytics';
+export type TabType = 'auction' | 'membership' | 'expenses' | 'donations';

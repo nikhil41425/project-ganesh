@@ -4,19 +4,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { BarChart3, CalendarDays, ChevronDown, Gavel, HandCoins, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
+import { CalendarDays, ChevronDown, Gavel, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
 import { useYear } from '@/context/YearContext'
 
 interface HeaderProps { isAdmin: boolean; onLogout: () => void }
 
 const tabs = [
-  { id: 'dashboard', name: 'Dashboard', shortName: 'Home', href: '/dashboard', icon: Home },
-  { id: 'auction', name: 'Auction', shortName: 'Auction', href: '/dashboard/auction', icon: Gavel },
-  { id: 'membership', name: 'Membership', shortName: 'Members', href: '/dashboard/membership', icon: Users },
-  { id: 'expenses', name: 'Expenses', shortName: 'Expenses', href: '/dashboard/expenses', icon: ReceiptText },
-  { id: 'donations', name: 'Donations', shortName: 'Donations', href: '/dashboard/donations', icon: Heart },
-  { id: 'dues', name: 'Dues', shortName: 'Dues', href: '/dashboard/dues', icon: HandCoins },
-  { id: 'analytics', name: 'Reports', shortName: 'Reports', href: '/dashboard/analytics', icon: BarChart3 },
+  { id: 'dashboard', name: 'Dashboard', shortName: 'Home', teluguName: 'హోమ్', href: '/dashboard', icon: Home },
+  { id: 'auction', name: 'Auction', shortName: 'Auction', teluguName: 'సవాల్', href: '/dashboard/auction', icon: Gavel },
+  { id: 'membership', name: 'Membership', shortName: 'Members', teluguName: 'సభ్యులు', href: '/dashboard/membership', icon: Users },
+  { id: 'expenses', name: 'Expenses', shortName: 'Expenses', teluguName: 'ఖర్చులు', href: '/dashboard/expenses', icon: ReceiptText },
+  { id: 'donations', name: 'Donations', shortName: 'Donations', teluguName: 'విరాళాలు', href: '/dashboard/donations', icon: Heart },
 ]
 
 const mobileTabs = tabs.slice(0, 5)
@@ -88,7 +86,7 @@ export default function Header({ isAdmin, onLogout }: HeaderProps) {
       </header>
       <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-700 bg-[#102a36]/98 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5">
-          {mobileTabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition ${isActive(tab.href) ? 'text-emerald-300' : 'text-slate-400'}`}>{isActive(tab.href) ? <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-emerald-400" /> : null}<Icon className="h-[18px] w-[18px]" aria-hidden="true" /><span className="truncate">{tab.shortName}</span></Link> })}
+          {mobileTabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`relative flex min-h-[72px] flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-semibold transition ${isActive(tab.href) ? 'text-emerald-300' : 'text-slate-400'}`}>{isActive(tab.href) ? <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-emerald-400" /> : null}<Icon className="mb-0.5 h-[18px] w-[18px]" aria-hidden="true" /><span className="truncate leading-tight">{tab.shortName}</span><span lang="te" className="truncate text-[9px] font-medium leading-tight opacity-80">{tab.teluguName}</span></Link> })}
         </div>
       </nav>
       {isNavigating ? <div className="fixed inset-0 z-[60] grid place-items-center bg-[#071b25]/70 backdrop-blur-sm"><div className="rounded-xl border border-slate-600 bg-[#102a36] px-5 py-3 text-sm font-semibold text-white">Loading…</div></div> : null}

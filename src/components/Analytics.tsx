@@ -3,14 +3,13 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { exportAnalyticsToPDF } from '@/utils/pdfExport'
-import type { AuctionItem, DonationItem, DuesItem, MembershipItem, SpentItem } from '@/types'
+import type { AuctionItem, DonationItem, MembershipItem, SpentItem } from '@/types'
 
 interface AnalyticsProps {
   auctionItems: AuctionItem[]
   membershipItems: MembershipItem[]
   spentItems: SpentItem[]
   donationItems: DonationItem[]
-  duesItems: DuesItem[]
   year: number
 }
 
@@ -24,7 +23,7 @@ const formatCurrency = (value: number) => `₹${Math.round(value).toLocaleString
 const sumField = (items: FinancialItem[], field: keyof FinancialItem) =>
   items.reduce((total, item) => total + Number(item[field] || 0), 0)
 
-export default function Analytics({ auctionItems, membershipItems, spentItems, donationItems, duesItems, year }: AnalyticsProps) {
+export default function Analytics({ auctionItems, membershipItems, spentItems, donationItems, year }: AnalyticsProps) {
   const router = useRouter()
   const [isExporting, setIsExporting] = useState(false)
 
@@ -62,10 +61,10 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   ]
 
   const quickActions = [
-    { label: 'Membership dues', route: '/dashboard/membership' },
-    { label: 'Auction dues', route: '/dashboard/auction' },
-    { label: 'Donation dues', route: '/dashboard/donations' },
-    { label: 'Expense dues', route: '/dashboard/expenses' },
+    { label: 'Membership', description: 'Review member payments', route: '/dashboard/membership', tone: 'from-cyan-500/20 to-cyan-500/5 border-cyan-400/30' },
+    { label: 'Auction', description: 'Track auction collections', route: '/dashboard/auction', tone: 'from-violet-500/20 to-violet-500/5 border-violet-400/30' },
+    { label: 'Donations', description: 'See donor contributions', route: '/dashboard/donations', tone: 'from-rose-500/20 to-rose-500/5 border-rose-400/30' },
+    { label: 'Expenses', description: 'Review outgoing payments', route: '/dashboard/expenses', tone: 'from-amber-500/20 to-amber-500/5 border-amber-400/30' },
   ]
 
   const totalStatuses = dashboard.incomingItems.length
@@ -76,7 +75,7 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      await exportAnalyticsToPDF({ auctionItems, membershipItems, spentItems, donationItems, duesItems, year })
+      await exportAnalyticsToPDF({ auctionItems, membershipItems, spentItems, donationItems, year })
     } finally {
       setIsExporting(false)
     }
@@ -143,25 +142,24 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
           </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-600/60 bg-[#102a36] p-4 shadow-xl sm:p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Quick actions</p>
-          <h2 className="mt-2 text-xl font-bold">What do you want to check?</h2>
-          <div className="mt-4 hidden gap-3 sm:grid sm:grid-cols-2">
-            {quickActions.map(({ label, route }) => (
-              <button key={label} onClick={() => router.push(route)} className="group flex items-center justify-between rounded-xl border border-slate-600 bg-[#173642] px-4 py-4 text-left font-semibold transition hover:border-emerald-400 hover:bg-[#1b4050]">
-                <span>{label}</span><span className="text-xs text-slate-400">View</span>
+        <article className="overflow-hidden rounded-2xl border border-slate-600/60 bg-[#102a36] shadow-xl">
+          <div className="border-b border-slate-600/60 px-5 py-5">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Quick actions</p>
+            <h2 className="mt-2 text-xl font-bold">Jump to what matters</h2>
+            <p className="mt-1 text-sm text-slate-400">Open a section, share the current summary, or download a polished report.</p>
+          </div>
+          <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+            {quickActions.map(({ label, description, route, tone }, index) => (
+              <button key={label} onClick={() => router.push(route)} className={`group min-h-28 rounded-2xl border bg-gradient-to-br p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-lg ${tone}`}>
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-xs font-black text-white">{index + 1}</span>
+                <span className="mt-4 flex items-center justify-between gap-3"><strong>{label}</strong><span className="text-lg text-slate-400 transition group-hover:translate-x-1 group-hover:text-white">→</span></span>
+                <span className="mt-1 block text-xs text-slate-400">{description}</span>
               </button>
             ))}
-            <button onClick={handleShare} className="flex items-center justify-center rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900">Share summary</button>
-            <button onClick={handleExport} disabled={isExporting} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-wait disabled:opacity-70">
-              {isExporting ? 'Preparing report…' : 'Download full report'}
-            </button>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:hidden">
-            <button onClick={handleShare} className="flex items-center justify-center rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-4 font-semibold text-emerald-200 transition hover:bg-emerald-900">Share summary</button>
-            <button onClick={handleExport} disabled={isExporting} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-4 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-wait disabled:opacity-70">
-              {isExporting ? 'Preparing…' : 'Report'}
-            </button>
+          <div className="grid grid-cols-2 gap-3 border-t border-slate-600/60 bg-[#0c242f] p-4 sm:p-5">
+            <button onClick={handleShare} className="rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-3 text-sm font-bold text-emerald-200 transition hover:border-emerald-500 hover:bg-emerald-900">Share summary</button>
+            <button onClick={handleExport} disabled={isExporting} className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-[#062018] shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-400 disabled:cursor-wait disabled:opacity-70">{isExporting ? 'Preparing report…' : 'Download PDF report'}</button>
           </div>
         </article>
 

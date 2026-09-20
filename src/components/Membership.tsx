@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Trash2, Edit2, Save, X, Plus, Users, Search } from 'lucide-react'
 import { isEditEnabled, isDeleteEnabled } from '@/lib/config'
+import { filterAndSortByStatus, getStatusRowClass, PaymentStatusBadge, PaymentStatusSelect, type PaymentStatusFilter } from '@/components/PaymentStatus'
 
 // Define types
 interface MembershipItem {
@@ -65,6 +66,8 @@ export default function Membership({
 }: MembershipProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [editFormData, setEditFormData] = useState<any>(null)
+  const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>('all')
+  const visibleItems = useMemo(() => filterAndSortByStatus(items, statusFilter), [items, statusFilter])
 
   const form = useForm<MembershipItemForm>({
     resolver: zodResolver(membershipItemSchema),
@@ -184,6 +187,7 @@ export default function Membership({
               className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white input-visible shadow-sm text-gray-800 placeholder-gray-500"
             />
           </div>
+          <PaymentStatusSelect value={statusFilter} onChange={setStatusFilter} />
           {canManage && <button
             onClick={() => onShowAddForm(true)}
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -257,7 +261,7 @@ export default function Membership({
         {/* Desktop Table View */}
         <div className="hidden md:block">
           <div className="overflow-x-auto">
-            <table className="w-full divide-y divide-gray-200/50 min-w-[1160px]">
+            <table className="payment-table w-full min-w-[1160px]">
               <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm">
                 <tr>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Name</th>
@@ -267,6 +271,7 @@ export default function Membership({
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Comment</th>
                   <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Created</th>
                   <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Updated</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] border-r border-gray-200">Status</th>
                   <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">Actions</th>
                 </tr>
               </thead>
@@ -284,10 +289,10 @@ export default function Membership({
                     </td>
                   </tr>
                 ) : (
-                  items.map((item) => {
+                  visibleItems.map((item) => {
                     const isEditing = editingItem === item.id
                     return (
-                      <tr key={item.id} className="hover:bg-blue-50/50 transition-colors duration-200">
+                      <tr key={item.id} className={`transition-colors duration-200 ${getStatusRowClass(item)}`}>
                         <td className="px-3 py-4 text-sm font-medium text-gray-900 border-r border-gray-200">
                           {isEditing ? (
                             <input
@@ -347,6 +352,7 @@ export default function Membership({
                         <td className="px-2 py-4 text-sm text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.updated_at)}</div>
                         </td>
+                        <td className="px-3 py-4 border-r border-gray-200"><PaymentStatusBadge item={item} /></td>
                         <td className="px-3 py-4 text-sm font-medium">
                           <div className="flex gap-2">
                             {isEditing ? (
@@ -413,7 +419,7 @@ export default function Membership({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full divide-y divide-gray-200/50 min-w-[700px]">
+            <table className="payment-table w-full min-w-[700px]">
                 <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm">
                   <tr>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] border-r border-gray-200">Name</th>
@@ -423,14 +429,15 @@ export default function Membership({
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] border-r border-gray-200">Comment</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px] border-r border-gray-200">Created</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px] border-r border-gray-200">Updated</th>
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[110px] border-r border-gray-200">Status</th>
                     <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white/60 backdrop-blur-sm divide-y divide-gray-200/30">
-                  {items.map((item) => {
+                  {visibleItems.map((item) => {
                     const isEditing = editingItem === item.id
                     return (
-                      <tr key={item.id} className="hover:bg-blue-50/50 transition-colors duration-200">
+                      <tr key={item.id} className={`transition-colors duration-200 ${getStatusRowClass(item)}`}>
                         <td className="px-2 py-3 text-sm border-r border-gray-200">
                           {isEditing ? (
                             <input
@@ -492,6 +499,7 @@ export default function Membership({
                         <td className="px-2 py-3 text-xs text-gray-400 border-r border-gray-200">
                           <div className="truncate">{formatDateTime(item.updated_at)}</div>
                         </td>
+                        <td className="px-2 py-3 border-r border-gray-200"><PaymentStatusBadge item={item} /></td>
                         <td className="px-2 py-3 text-sm font-medium">
                           <div className="flex gap-2">
                             {isEditing ? (

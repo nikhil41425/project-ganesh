@@ -4,17 +4,6 @@ export const TABLES = {
   MEMBERSHIP_ITEMS: 'membership_items', 
   SPENT_ITEMS: 'spent_items',
   DONATION_ITEMS: 'donation_items',
-  DUES_ITEMS: 'dues_items'
-} as const;
-
-// Navigation Tabs
-export const TABS = {
-  AUCTION: 'auction',
-  MEMBERSHIP: 'membership', 
-  EXPENSES: 'expenses',
-  DONATIONS: 'donations',
-  DUES: 'dues',
-  ANALYTICS: 'analytics'
 } as const;
 
 // Form Validation Messages
