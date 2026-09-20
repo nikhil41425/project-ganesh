@@ -198,6 +198,11 @@ body {
 .dashboard-detail-page :is(section, article, table, thead, tbody)[class*="bg-white"],
 .dashboard-detail-page div[class*="bg-white/"],
 .dashboard-detail-page :is(div, table, thead, tbody)[class*="from-blue-50"],
+.dashboard-detail-page :is(div, table, thead, tbody)[class*="from-cyan-50"],
+.dashboard-detail-page :is(div, table, thead, tbody)[class*="from-green-50"],
+.dashboard-detail-page :is(div, table, thead, tbody)[class*="from-emerald-50"],
+.dashboard-detail-page :is(div, table, thead, tbody)[class*="from-orange-50"],
+.dashboard-detail-page :is(div, table, thead, tbody)[class*="from-rose-50"],
 .dashboard-detail-page :is(div, table, thead, tbody)[class*="from-gray-50"] {
   border-color: var(--app-border) !important;
   background-color: var(--app-surface) !important;
@@ -213,18 +218,8 @@ body {
   background-image: none !important;
 }
 
-.dashboard-detail-page svg {
-  display: none !important;
-}
-
-.dashboard-detail-page button[title]::after {
-  content: attr(title);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
 .dashboard-detail-page input[class*="pl-10"] {
-  padding-left: 1rem !important;
+  padding-left: 2.5rem !important;
 }
 
 .dashboard-detail-page button[class*="from-blue"] {
@@ -286,6 +281,11 @@ body {
 .dashboard-detail-page select {
   border-color: #475569 !important;
   background: #f8fafc !important;
+}
+
+.dashboard-shell .animate-spin {
+  height: 2.5rem !important;
+  width: 2.5rem !important;
 }
 
 @media (max-width: 639px) {

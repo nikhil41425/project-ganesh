@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { CalendarDays, ChevronDown, Gavel, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
+import { BarChart3, CalendarDays, ChevronDown, Gavel, HandCoins, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
 import { useYear } from '@/context/YearContext'
 
 interface HeaderProps { onLogout: () => void }
@@ -15,7 +15,11 @@ const tabs = [
   { id: 'membership', name: 'Membership', shortName: 'Members', href: '/dashboard/membership', icon: Users },
   { id: 'expenses', name: 'Expenses', shortName: 'Expenses', href: '/dashboard/expenses', icon: ReceiptText },
   { id: 'donations', name: 'Donations', shortName: 'Donations', href: '/dashboard/donations', icon: Heart },
+  { id: 'dues', name: 'Dues', shortName: 'Dues', href: '/dashboard/dues', icon: HandCoins },
+  { id: 'analytics', name: 'Reports', shortName: 'Reports', href: '/dashboard/analytics', icon: BarChart3 },
 ]
+
+const mobileTabs = tabs.slice(0, 5)
 
 export default function Header({ onLogout }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -64,7 +68,7 @@ export default function Header({ onLogout }: HeaderProps) {
               </button>
             </div>
           </div>
-          <nav aria-label="Desktop navigation" className="hidden h-12 items-center gap-7 border-t border-slate-700/50 md:flex">
+          <nav aria-label="Desktop navigation" className="hidden h-12 items-center gap-5 border-t border-slate-700/50 md:flex lg:gap-7">
             {tabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`flex h-full items-center gap-2 border-b-2 text-sm font-semibold transition ${isActive(tab.href) ? 'border-emerald-400 text-white' : 'border-transparent text-slate-400 hover:text-white'}`}><Icon className="h-4 w-4" aria-hidden="true" />{tab.name}</Link> })}
             <button type="button" onClick={onLogout} className="ml-auto flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</button>
           </nav>
@@ -81,7 +85,7 @@ export default function Header({ onLogout }: HeaderProps) {
       </header>
       <nav aria-label="Primary navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-700 bg-[#102a36]/98 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5">
-          {tabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition ${isActive(tab.href) ? 'text-emerald-300' : 'text-slate-400'}`}>{isActive(tab.href) ? <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-emerald-400" /> : null}<Icon className="h-[18px] w-[18px]" aria-hidden="true" /><span className="truncate">{tab.shortName}</span></Link> })}
+          {mobileTabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`relative flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition ${isActive(tab.href) ? 'text-emerald-300' : 'text-slate-400'}`}>{isActive(tab.href) ? <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-emerald-400" /> : null}<Icon className="h-[18px] w-[18px]" aria-hidden="true" /><span className="truncate">{tab.shortName}</span></Link> })}
         </div>
       </nav>
       {isNavigating ? <div className="fixed inset-0 z-[60] grid place-items-center bg-[#071b25]/70 backdrop-blur-sm"><div className="rounded-xl border border-slate-600 bg-[#102a36] px-5 py-3 text-sm font-semibold text-white">Loading…</div></div> : null}

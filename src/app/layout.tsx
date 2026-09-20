@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -12,18 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Friendz Youth - Dashboard",
   description: "A dashboard application with authentication and data management",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover"
-  },
   manifest: "/manifest.json",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#000000" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" }
-  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -66,6 +55,18 @@ export const metadata: Metadata = {
     "msapplication-config": "none",
     "format-detection": "telephone=no"
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#071b25" },
+    { media: "(prefers-color-scheme: dark)", color: "#071b25" },
+  ],
 };
 
 export default function RootLayout({

@@ -36,9 +36,9 @@ PWA Status:
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">PWA Installation Test</h1>
         
-        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 text-gray-900 shadow-lg">
           <div>
-            <h2 className="text-xl font-semibold mb-4">PWA Install Tests</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">PWA Install Tests</h2>
             
             <div className="space-y-4">
               <button
@@ -58,7 +58,7 @@ PWA Status:
           </div>
           
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-3">Manual Install Methods</h3>
+            <h3 className="mb-3 text-lg font-medium text-gray-900">Manual Install Methods</h3>
             <div className="space-y-2 text-sm text-gray-600">
               <p>🔍 <strong>Edge:</strong> Look for install icon (⊞) in address bar</p>
               <p>📱 <strong>Chrome:</strong> Menu → Install app</p>
@@ -68,8 +68,8 @@ PWA Status:
           </div>
           
           <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-3">Requirements Check</h3>
-            <div className="text-sm space-y-1">
+            <h3 className="mb-3 text-lg font-medium text-gray-900">Requirements Check</h3>
+            <div className="space-y-1 text-sm text-gray-700">
               <p>✅ HTTPS/localhost</p>
               <p>✅ Web App Manifest</p>
               <p>✅ Service Worker</p>

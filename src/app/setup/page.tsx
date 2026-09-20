@@ -64,8 +64,8 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Database Setup</h1>
         
         <p className="text-gray-600 mb-6">
