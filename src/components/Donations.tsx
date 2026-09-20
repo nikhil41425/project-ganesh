@@ -49,6 +49,7 @@ interface DonationsProps {
   onAddItem: (data: DonationItemForm) => Promise<void>
   onDeleteItem: (id: string) => Promise<void>
   onUpdateItem: (id: string, data: Partial<DonationItem>) => Promise<void>
+  canManage: boolean
 }
 
 export default function Donations({
@@ -59,7 +60,8 @@ export default function Donations({
   onShowAddForm,
   onAddItem,
   onDeleteItem,
-  onUpdateItem
+  onUpdateItem,
+  canManage
 }: DonationsProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [editFormData, setEditFormData] = useState<any>(null)
@@ -177,19 +179,19 @@ export default function Donations({
               className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white input-visible shadow-sm"
             />
           </div>
-          <button
+          {canManage && <button
             onClick={() => onShowAddForm(true)}
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             <Plus size={16} />
             Add Donation
-          </button>
+          </button>}
           </div>
         </div>
       </div>
 
       {/* Add Form */}
-      {showAddForm && (
+      {canManage && showAddForm && (
         <div className="bg-white input-visible rounded-lg p-6 shadow-lg border border-white/20">
           <form
             onSubmit={form.handleSubmit(handleAddSubmit)}
@@ -361,7 +363,7 @@ export default function Donations({
                               </>
                             ) : (
                               <>
-                                {isEditEnabled() && (
+                                {canManage && isEditEnabled() && (
                                   <button
                                     onClick={() => startEditing(item)}
                                     className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-2 rounded transition-all duration-200"
@@ -370,7 +372,7 @@ export default function Donations({
                                     <Edit2 size={16} />
                                   </button>
                                 )}
-                                {isDeleteEnabled() && (
+                                {canManage && isDeleteEnabled() && (
                                   <button
                                     onClick={() => onDeleteItem(item.id)}
                                     className="text-red-600 hover:text-red-800 hover:bg-red-100 p-2 rounded transition-all duration-200"
@@ -506,7 +508,7 @@ export default function Donations({
                               </>
                             ) : (
                               <>
-                                {isEditEnabled() && (
+                                {canManage && isEditEnabled() && (
                                   <button
                                     onClick={() => startEditing(item)}
                                     className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1 rounded transition-all duration-200"
@@ -515,7 +517,7 @@ export default function Donations({
                                     <Edit2 size={14} />
                                   </button>
                                 )}
-                                {isDeleteEnabled() && (
+                                {canManage && isDeleteEnabled() && (
                                   <button
                                     onClick={() => onDeleteItem(item.id)}
                                     className="text-red-600 hover:text-red-800 hover:bg-red-100 p-1 rounded transition-all duration-200"

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import Dues from '@/components/Dues'
 import { useYear } from '@/context/YearContext'
+import { useAccess } from '@/context/AccessContext'
 
 // Define types for dues items
 interface DuesItem {
@@ -22,44 +22,25 @@ interface DuesItem {
 
 export default function DuesPage() {
   const { selectedYear } = useYear()
-  const [user, setUser] = useState<any>(null)
+  const { user, isAdmin } = useAccess()
   const [duesItems, setDuesItems] = useState<DuesItem[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   
-  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    getUser()
-  }, [])
-
-  useEffect(() => {
-    if (user) {
-      getDuesItems(searchTerm)
-    }
+    getDuesItems(searchTerm)
   }, [user, searchTerm, selectedYear])
 
-  const getUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      setUser(user)
-    } else {
-      router.push('/auth/login')
-    }
-    setLoading(false)
-  }
-
   const getDuesItems = async (search?: string) => {
-    if (!user) return
-    
     let query = supabase
       .from('dues_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+
+    if (user) query = query.eq('user_id', user.id)
 
     if (search) {
       query = query.or(`name.ilike.%${search}%,comment.ilike.%${search}%`)
@@ -125,18 +106,6 @@ export default function DuesPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="dashboard-detail-page space-y-6">
         <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Dues Management — {selectedYear}</h1>
@@ -150,6 +119,7 @@ export default function DuesPage() {
         onAddItem={addDuesItem}
         onUpdateItem={updateDuesItem}
         onDeleteItem={deleteDuesItem}
+        canManage={isAdmin}
       />
     </div>
   )

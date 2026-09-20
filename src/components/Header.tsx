@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { BarChart3, CalendarDays, ChevronDown, Gavel, HandCoins, Heart, Home, LogOut, Menu, ReceiptText, Users, X } from 'lucide-react'
 import { useYear } from '@/context/YearContext'
 
-interface HeaderProps { onLogout: () => void }
+interface HeaderProps { isAdmin: boolean; onLogout: () => void }
 
 const tabs = [
   { id: 'dashboard', name: 'Dashboard', shortName: 'Home', href: '/dashboard', icon: Home },
@@ -21,7 +21,7 @@ const tabs = [
 
 const mobileTabs = tabs.slice(0, 5)
 
-export default function Header({ onLogout }: HeaderProps) {
+export default function Header({ isAdmin, onLogout }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
   const { selectedYear, setSelectedYear, availableYears } = useYear()
@@ -48,6 +48,9 @@ export default function Header({ onLogout }: HeaderProps) {
               </div>
             </Link>
             <div className="flex shrink-0 items-center gap-2">
+              <span className={`hidden rounded-full border px-3 py-1.5 text-xs font-bold sm:inline-flex ${isAdmin ? 'border-emerald-500/50 bg-emerald-400/10 text-emerald-300' : 'border-cyan-500/50 bg-cyan-400/10 text-cyan-200'}`}>
+                {isAdmin ? 'Admin' : 'View only'}
+              </span>
               <div className="relative flex h-11 min-w-[104px] items-center gap-2 rounded-xl border border-slate-600 bg-[#102a36] px-2.5 shadow-sm transition hover:border-slate-500 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/20 sm:min-w-[116px]">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-400/10 text-emerald-300">
                   <CalendarDays className="h-4 w-4" aria-hidden="true" />
@@ -70,7 +73,7 @@ export default function Header({ onLogout }: HeaderProps) {
           </div>
           <nav aria-label="Desktop navigation" className="hidden h-12 items-center gap-5 border-t border-slate-700/50 md:flex lg:gap-7">
             {tabs.map((tab) => { const Icon = tab.icon; return <Link key={tab.id} href={tab.href} aria-current={isActive(tab.href) ? 'page' : undefined} className={`flex h-full items-center gap-2 border-b-2 text-sm font-semibold transition ${isActive(tab.href) ? 'border-emerald-400 text-white' : 'border-transparent text-slate-400 hover:text-white'}`}><Icon className="h-4 w-4" aria-hidden="true" />{tab.name}</Link> })}
-            <button type="button" onClick={onLogout} className="ml-auto flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</button>
+            {isAdmin ? <button type="button" onClick={onLogout} className="ml-auto flex items-center gap-2 text-sm font-semibold text-slate-400 transition hover:text-white"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</button> : <Link href="/auth/login" className="ml-auto text-sm font-semibold text-emerald-300 transition hover:text-emerald-200">Admin login</Link>}
           </nav>
         </div>
         {isMobileMenuOpen ? (
@@ -78,7 +81,7 @@ export default function Header({ onLogout }: HeaderProps) {
             <nav aria-label="Menu navigation" className="mx-auto max-w-7xl space-y-1">
               {tabs.map((tab) => { const Icon = tab.icon; return <button key={tab.id} type="button" onClick={() => navigate(tab.href)} disabled={isNavigating} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${isActive(tab.href) ? 'bg-[#173642] text-emerald-300' : 'text-slate-300 hover:bg-[#102a36]'}`}><Icon className="h-5 w-5" aria-hidden="true" /><span>{tab.name}</span>{isActive(tab.href) ? <span className="ml-auto text-[10px] uppercase tracking-wider">Current</span> : null}</button> })}
               <div className="my-2 border-t border-slate-700" />
-              <button type="button" onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-rose-300 hover:bg-[#102a36]"><LogOut className="h-5 w-5" aria-hidden="true" />Sign out</button>
+              {isAdmin ? <button type="button" onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-rose-300 hover:bg-[#102a36]"><LogOut className="h-5 w-5" aria-hidden="true" />Sign out</button> : <button type="button" onClick={() => navigate('/auth/login')} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-emerald-300 hover:bg-[#102a36]"><LogOut className="h-5 w-5" aria-hidden="true" />Admin login</button>}
             </nav>
           </div>
         ) : null}

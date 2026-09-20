@@ -31,19 +31,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // If user is authenticated and trying to access auth pages or root, redirect to dashboard
-  if (user && (request.nextUrl.pathname.startsWith('/auth') || request.nextUrl.pathname === '/')) {
+  if (request.nextUrl.pathname === '/auth/register') {
+    const url = request.nextUrl.clone()
+    url.pathname = user ? '/dashboard' : '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Authenticated admins do not need to see the login screen.
+  if (user && request.nextUrl.pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
-  // If user is not authenticated and trying to access protected routes, redirect to login
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    request.nextUrl.pathname !== '/'
-  ) {
+  if (!user && request.nextUrl.pathname === '/setup') {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)

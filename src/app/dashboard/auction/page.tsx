@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import Auction from '@/components/Auction'
 import { useYear } from '@/context/YearContext'
+import { useAccess } from '@/context/AccessContext'
 
 // Define types for auction items
 interface AuctionItem {
@@ -23,44 +23,25 @@ interface AuctionItem {
 
 export default function AuctionPage() {
   const { selectedYear } = useYear()
-  const [user, setUser] = useState<any>(null)
+  const { user, isAdmin } = useAccess()
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
   
-  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    getUser()
-  }, [])
-
-  useEffect(() => {
-    if (user) {
-      getAuctionItems(searchTerm)
-    }
+    getAuctionItems(searchTerm)
   }, [user, searchTerm, selectedYear])
 
-  const getUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      setUser(user)
-    } else {
-      router.push('/auth/login')
-    }
-    setLoading(false)
-  }
-
   const getAuctionItems = async (search?: string) => {
-    if (!user) return
-    
     let query = supabase
       .from('auction_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+
+    if (user) query = query.eq('user_id', user.id)
 
     if (search) {
       query = query.or(`name.ilike.%${search}%,item.ilike.%${search}%,comment.ilike.%${search}%`)
@@ -126,18 +107,6 @@ export default function AuctionPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
   return (
     <div className="dashboard-detail-page space-y-6">
         <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Auction (సవాల్) — {selectedYear}</h1>
@@ -151,6 +120,7 @@ export default function AuctionPage() {
         onAddItem={addAuctionItem}
         onUpdateItem={updateAuctionItem}
         onDeleteItem={deleteAuctionItem}
+        canManage={isAdmin}
       />
     </div>
   )

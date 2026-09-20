@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import Analytics from '@/components/Analytics'
 import { useYear } from '@/context/YearContext'
+import { useAccess } from '@/context/AccessContext'
 import type { 
   AuctionItem, 
   MembershipItem, 
@@ -15,31 +15,20 @@ import type {
 
 export default function DashboardPage() {
   const { selectedYear } = useYear()
-  const [user, setUser] = useState<any>(null)
+  const { user } = useAccess()
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [membershipItems, setMembershipItems] = useState<MembershipItem[]>([])
   const [spentItems, setSpentItems] = useState<SpentItem[]>([])
   const [donationItems, setDonationItems] = useState<DonationItem[]>([])
   const [duesItems, setDuesItems] = useState<DuesItem[]>([])
-  const [loading, setLoading] = useState(true)
-  
-  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    getUser()
-  }, [])
-
-  useEffect(() => {
-    if (user) {
-      getAllDataForAnalytics()
-    }
+    getAllDataForAnalytics()
   }, [user, selectedYear])
 
   // Function to load all data for analytics
   const getAllDataForAnalytics = async () => {
-    if (!user) return
-    
     // Load all data in parallel
     await Promise.all([
       getAuctionItems(),
@@ -50,25 +39,14 @@ export default function DashboardPage() {
     ])
   }
 
-  const getUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      setUser(user)
-    } else {
-      router.push('/auth/login')
-    }
-    setLoading(false)
-  }
-
   const getAuctionItems = async () => {
-    if (!user) return
-    
-    const { data, error } = await supabase
+    let query = supabase
       .from('auction_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+    if (user) query = query.eq('user_id', user.id)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching auction items:', error)
@@ -78,14 +56,13 @@ export default function DashboardPage() {
   }
 
   const getMembershipItems = async () => {
-    if (!user) return
-    
-    const { data, error } = await supabase
+    let query = supabase
       .from('membership_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+    if (user) query = query.eq('user_id', user.id)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching membership items:', error)
@@ -95,14 +72,13 @@ export default function DashboardPage() {
   }
 
   const getSpentItems = async () => {
-    if (!user) return
-    
-    const { data, error } = await supabase
+    let query = supabase
       .from('spent_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+    if (user) query = query.eq('user_id', user.id)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching spent items:', error)
@@ -112,14 +88,13 @@ export default function DashboardPage() {
   }
 
   const getDonationItems = async () => {
-    if (!user) return
-    
-    const { data, error } = await supabase
+    let query = supabase
       .from('donation_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+    if (user) query = query.eq('user_id', user.id)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching donation items:', error)
@@ -129,32 +104,19 @@ export default function DashboardPage() {
   }
 
   const getDuesItems = async () => {
-    if (!user) return
-    
-    const { data, error } = await supabase
+    let query = supabase
       .from('dues_items')
       .select('*')
-      .eq('user_id', user.id)
       .eq('year', selectedYear)
       .order('created_at', { ascending: false })
+    if (user) query = query.eq('user_id', user.id)
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching dues items:', error)
     } else {
       setDuesItems(data || [])
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
   }
 
   return (

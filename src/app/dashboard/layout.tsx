@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { YearProvider } from '@/context/YearContext'
+import { AccessProvider } from '@/context/AccessContext'
 
 export default function DashboardLayout({
   children,
@@ -26,15 +27,13 @@ export default function DashboardLayout({
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       setUser(user)
-    } else {
-      router.push('/auth/login')
     }
     setLoading(false)
   }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    router.push('/')
   }
 
   if (loading) {
@@ -45,14 +44,11 @@ export default function DashboardLayout({
     )
   }
 
-  if (!user) {
-    return null
-  }
-
   return (
+    <AccessProvider user={user}>
     <YearProvider>
       <div className="dashboard-shell min-h-screen bg-[#071b25] text-slate-100">
-        <Header onLogout={handleSignOut} />
+        <Header isAdmin={Boolean(user)} onLogout={handleSignOut} />
 
         {/* Main Content */}
         <main className="mx-auto max-w-7xl pb-24 sm:px-6 sm:py-8 md:pb-8 lg:px-8">
@@ -62,5 +58,6 @@ export default function DashboardLayout({
         <Footer />
       </div>
     </YearProvider>
+    </AccessProvider>
   )
 }
