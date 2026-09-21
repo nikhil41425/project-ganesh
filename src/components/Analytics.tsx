@@ -76,10 +76,6 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   }
 
   const handleShare = async () => {
-    const breakdown = summaryRows
-      .map((row) => `• ${row.label}: ${row.entries} | Paid ${formatCurrency(row.paid)} | Due ${formatCurrency(row.due)}`)
-      .join('\n')
-
     const message = [
       `FRIENDZ YOUTH – CHOLLER`,
       `Financial summary · ${year}`,
@@ -90,13 +86,6 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
       `• Income outstanding: ${formatCurrency(dashboard.incomingDue)}`,
       `• Expenses paid: ${formatCurrency(dashboard.expensePaid)} of ${formatCurrency(dashboard.expenseTotal)}`,
       `• Expenses outstanding: ${formatCurrency(dashboard.expenseDue)}`,
-      '',
-      'PAYMENT STATUS',
-      `• Paid: ${dashboard.status.paid} | Partial: ${dashboard.status.partial} | Due: ${dashboard.status.due}`,
-      `• Total income records: ${totalStatuses}`,
-      '',
-      'SECTION BREAKDOWN',
-      breakdown,
       '',
       `For more details, visit: ${window.location.origin}/dashboard`,
     ].join('\n')
