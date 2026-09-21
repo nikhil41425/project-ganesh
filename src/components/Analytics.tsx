@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Download, Share2 } from 'lucide-react'
 import { exportAnalyticsToPDF } from '@/utils/pdfExport'
 import type { AuctionItem, DonationItem, MembershipItem, SpentItem } from '@/types'
 
@@ -60,13 +61,6 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
     { label: 'Donations', entries: `${donationItems.length} people`, total: sumField(donationItems, 'amount'), paid: sumField(donationItems, 'paid'), due: sumField(donationItems, 'due'), route: '/dashboard/donations' },
   ]
 
-  const quickActions = [
-    { label: 'Membership', description: 'Review member payments', route: '/dashboard/membership', tone: 'from-cyan-500/20 to-cyan-500/5 border-cyan-400/30' },
-    { label: 'Auction', description: 'Track auction collections', route: '/dashboard/auction', tone: 'from-violet-500/20 to-violet-500/5 border-violet-400/30' },
-    { label: 'Donations', description: 'See donor contributions', route: '/dashboard/donations', tone: 'from-rose-500/20 to-rose-500/5 border-rose-400/30' },
-    { label: 'Expenses', description: 'Review outgoing payments', route: '/dashboard/expenses', tone: 'from-amber-500/20 to-amber-500/5 border-amber-400/30' },
-  ]
-
   const totalStatuses = dashboard.incomingItems.length
   const paidPercent = totalStatuses > 0 ? (dashboard.status.paid / totalStatuses) * 100 : 0
   const partialPercent = totalStatuses > 0 ? (dashboard.status.partial / totalStatuses) * 100 : 0
@@ -82,7 +76,31 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   }
 
   const handleShare = async () => {
-    const message = `${year} Friends Youth - Choller: ${formatCurrency(dashboard.incomingPaid)} collected of ${formatCurrency(dashboard.incomingTotal)}; ${formatCurrency(dashboard.incomingDue)} due.`
+    const breakdown = summaryRows
+      .map((row) => `• ${row.label}: ${row.entries} | Paid ${formatCurrency(row.paid)} | Due ${formatCurrency(row.due)}`)
+      .join('\n')
+
+    const message = [
+      `FRIENDZ YOUTH – CHOLLER`,
+      `Financial summary · ${year}`,
+      '',
+      'OVERVIEW',
+      `• Account balance: ${formatCurrency(dashboard.accountBalance)}`,
+      `• Income collected: ${formatCurrency(dashboard.incomingPaid)} of ${formatCurrency(dashboard.incomingTotal)} (${dashboard.collectionProgress.toFixed(1)}%)`,
+      `• Income outstanding: ${formatCurrency(dashboard.incomingDue)}`,
+      `• Expenses paid: ${formatCurrency(dashboard.expensePaid)} of ${formatCurrency(dashboard.expenseTotal)}`,
+      `• Expenses outstanding: ${formatCurrency(dashboard.expenseDue)}`,
+      '',
+      'PAYMENT STATUS',
+      `• Paid: ${dashboard.status.paid} | Partial: ${dashboard.status.partial} | Due: ${dashboard.status.due}`,
+      `• Total income records: ${totalStatuses}`,
+      '',
+      'SECTION BREAKDOWN',
+      breakdown,
+      '',
+      `For more details, visit: ${window.location.origin}/dashboard`,
+    ].join('\n')
+
     if (navigator.share) {
       await navigator.share({ title: `Friends Youth - Choller ${year}`, text: message })
       return
@@ -145,21 +163,18 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
         <article className="overflow-hidden rounded-2xl border border-slate-600/60 bg-[#102a36] shadow-xl">
           <div className="border-b border-slate-600/60 px-5 py-5">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Quick actions</p>
-            <h2 className="mt-2 text-xl font-bold">Jump to what matters</h2>
-            <p className="mt-1 text-sm text-slate-400">Open a section, share the current summary, or download a polished report.</p>
+            <h2 className="mt-2 text-xl font-bold">Share or export</h2>
+            <p className="mt-1 text-sm text-slate-400">Send a detailed financial snapshot or save the complete PDF report.</p>
           </div>
-          <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
-            {quickActions.map(({ label, description, route, tone }, index) => (
-              <button key={label} onClick={() => router.push(route)} className={`group min-h-28 rounded-2xl border bg-gradient-to-br p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-lg ${tone}`}>
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-xs font-black text-white">{index + 1}</span>
-                <span className="mt-4 flex items-center justify-between gap-3"><strong>{label}</strong><span className="text-lg text-slate-400 transition group-hover:translate-x-1 group-hover:text-white">→</span></span>
-                <span className="mt-1 block text-xs text-slate-400">{description}</span>
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-3 border-t border-slate-600/60 bg-[#0c242f] p-4 sm:p-5">
-            <button onClick={handleShare} className="rounded-xl border border-emerald-700 bg-emerald-950/70 px-4 py-3 text-sm font-bold text-emerald-200 transition hover:border-emerald-500 hover:bg-emerald-900">Share summary</button>
-            <button onClick={handleExport} disabled={isExporting} className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-[#062018] shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-400 disabled:cursor-wait disabled:opacity-70">{isExporting ? 'Preparing report…' : 'Download PDF report'}</button>
+          <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
+            <button onClick={handleShare} className="group flex min-h-28 items-center gap-4 rounded-2xl border border-emerald-700 bg-emerald-950/70 p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-900 hover:shadow-lg">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-400/15 text-emerald-300"><Share2 aria-hidden="true" size={21} /></span>
+              <span><strong className="block text-sm text-emerald-100">Share summary</strong><span className="mt-1 block text-xs leading-5 text-slate-400">Balance, collections, expenses, payment status, and section totals.</span></span>
+            </button>
+            <button onClick={handleExport} disabled={isExporting} className="group flex min-h-28 items-center gap-4 rounded-2xl bg-emerald-500 p-4 text-left text-[#062018] shadow-lg shadow-emerald-950/30 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-xl disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#062018]/10"><Download aria-hidden="true" size={21} /></span>
+              <span><strong className="block text-sm">{isExporting ? 'Preparing report…' : 'Download PDF report'}</strong><span className="mt-1 block text-xs leading-5 text-emerald-950/70">Save the complete financial report for {year}.</span></span>
+            </button>
           </div>
         </article>
 
