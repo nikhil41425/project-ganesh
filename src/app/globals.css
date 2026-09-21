@@ -276,6 +276,98 @@ body {
   background: rgba(34, 211, 238, 0.06) !important;
 }
 
+/*
+ * Keep every data table readable in mobile browsers/PWA mode.  Some browsers
+ * auto-adjust translucent Tailwind backgrounds in dark mode, which could turn
+ * the table body light while the dashboard rules kept the row text light.
+ * Give the shared table class an explicit, opaque colour pairing instead.
+ */
+.dashboard-detail-page .payment-table {
+  color-scheme: dark;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--app-surface) !important;
+}
+
+.dashboard-detail-page .payment-table thead,
+.dashboard-detail-page .payment-table tbody,
+.dashboard-detail-page .payment-table tr,
+.dashboard-detail-page .payment-table td {
+  background-color: var(--app-surface) !important;
+}
+
+.dashboard-detail-page .payment-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.45) !important;
+  background-color: var(--app-surface-raised) !important;
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.dashboard-detail-page .payment-table td,
+.dashboard-detail-page .payment-table td :is(div, p) {
+  color: #e2e8f0 !important;
+}
+
+.dashboard-detail-page .payment-table tbody td {
+  border-right-color: rgba(100, 116, 139, 0.26) !important;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.3) !important;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+/* Status-led rows: tint the full row and reinforce it with a left colour rail. */
+.dashboard-detail-page .payment-table tbody tr[class*="bg-emerald-50"] {
+  --status-row: rgba(16, 185, 129, 0.08);
+  --status-row-hover: rgba(16, 185, 129, 0.15);
+  --status-accent: #34d399;
+}
+
+.dashboard-detail-page .payment-table tbody tr[class*="bg-amber-50"] {
+  --status-row: rgba(245, 158, 11, 0.09);
+  --status-row-hover: rgba(245, 158, 11, 0.17);
+  --status-accent: #fbbf24;
+}
+
+.dashboard-detail-page .payment-table tbody tr[class*="bg-rose-50"] {
+  --status-row: rgba(244, 63, 94, 0.09);
+  --status-row-hover: rgba(244, 63, 94, 0.17);
+  --status-accent: #fb7185;
+}
+
+.dashboard-detail-page .payment-table tbody tr[class*="bg-emerald-50"] td,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-amber-50"] td,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-rose-50"] td {
+  background-color: var(--status-row) !important;
+}
+
+.dashboard-detail-page .payment-table tbody tr[class*="bg-emerald-50"] td:first-child,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-amber-50"] td:first-child,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-rose-50"] td:first-child {
+  box-shadow: inset 4px 0 0 var(--status-accent);
+}
+
+.dashboard-detail-page .payment-table a {
+  color: #60a5fa !important;
+}
+
+.dashboard-detail-page .payment-table td span[class*="rounded-full"] {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.dashboard-detail-page .payment-table tbody tr:hover,
+.dashboard-detail-page .payment-table tbody tr:hover td {
+  background-color: #173642 !important;
+}
+
+.dashboard-detail-page .payment-table tbody tr[class*="bg-emerald-50"]:hover td,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-amber-50"]:hover td,
+.dashboard-detail-page .payment-table tbody tr[class*="bg-rose-50"]:hover td {
+  background-color: var(--status-row-hover) !important;
+}
+
 .dashboard-detail-page input,
 .dashboard-detail-page textarea,
 .dashboard-detail-page select {
