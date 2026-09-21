@@ -93,6 +93,8 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
     ink: [15, 23, 42] as const,
   }
 
+  const numericHeaders = new Set(['Amount', 'Total', 'Paid', 'Due'])
+
   const addPageHeader = () => {
     pdf.setFillColor(...colors.navy)
     pdf.rect(0, 0, pageWidth, 28, 'F')
@@ -158,8 +160,12 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
   }
 
   const drawTable = (title: string, headers: string[], rows: ReportRow[], widths: number[]) => {
-    // Keep the section heading, table header and at least one row together.
-    ensureSpace(rows.length > 0 ? 38 : 30)
+    // Keep compact summary tables together; for long tables, keep the heading,
+    // column labels, and first record on the same page.
+    const requiredStartSpace = rows.length > 0
+      ? rows.length <= 6 ? 29 + rows.length * 9 : 36
+      : 28
+    ensureSpace(requiredStartSpace)
     sectionTitle(title, `${rows.length} record${rows.length === 1 ? '' : 's'} for ${year}`)
     if (rows.length === 0) {
       pdf.setTextColor(...colors.slate)
@@ -179,7 +185,8 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
       pdf.setFontSize(7.5)
       let x = margin
       headers.forEach((header, index) => {
-        pdf.text(header, x + 2, y + 6)
+        if (numericHeaders.has(header)) pdf.text(header, x + widths[index] - 2, y + 6, { align: 'right' })
+        else pdf.text(header, x + 2, y + 6)
         x += widths[index]
       })
       y += 9
@@ -192,6 +199,11 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
       const rowHeight = Math.max(8, lines * 3.5 + 3)
       if (y + rowHeight > footerTop) {
         newPage()
+        pdf.setTextColor(...colors.slate)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(8)
+        pdf.text(`${title} - CONTINUED`, margin, y + 2)
+        y += 7
         drawHeader()
       }
       const statusIndex = headers.indexOf('Status')
@@ -202,6 +214,12 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
       else if (rowIndex % 2 === 0) pdf.setFillColor(248, 250, 252)
       else pdf.setFillColor(255, 255, 255)
       pdf.rect(margin, y, contentWidth, rowHeight, 'F')
+
+      if (status === 'Paid') pdf.setFillColor(16, 185, 129)
+      else if (status === 'Partially paid') pdf.setFillColor(245, 158, 11)
+      else if (status === 'Due') pdf.setFillColor(244, 63, 94)
+      if (status) pdf.rect(margin, y, 1.2, rowHeight, 'F')
+
       pdf.setDrawColor(226, 232, 240)
       pdf.line(margin, y + rowHeight, pageWidth - margin, y + rowHeight)
       pdf.setFont('helvetica', 'normal')
@@ -215,7 +233,8 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
         else if (header === 'Paid') pdf.setTextColor(5, 150, 105)
         else if (header === 'Due') pdf.setTextColor(225, 29, 72)
         else pdf.setTextColor(...colors.ink)
-        pdf.text(cell, x + 2, y + 5)
+        if (numericHeaders.has(header)) pdf.text(cell, x + widths[index] - 2, y + 5, { align: 'right' })
+        else pdf.text(cell, x + 2, y + 5)
         x += widths[index]
       })
       y += rowHeight
@@ -244,9 +263,8 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
     { label: 'Total records', value: String(incomingItems.length) },
   ])
 
-  sectionTitle('CATEGORY SUMMARY', `All dashboard sections for ${year}`)
   drawTable(
-    'SUMMARY BY SECTION',
+    'CATEGORY SUMMARY',
     ['Section', 'Entries', 'Total', 'Paid', 'Due'],
     categories.map((category) => [
       category.name,
