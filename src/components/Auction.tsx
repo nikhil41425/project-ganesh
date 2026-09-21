@@ -154,7 +154,11 @@ export default function Auction({
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-4 gap-2 md:gap-4">
+        <div className="rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 p-3 text-white shadow-lg md:p-6">
+          <h3 className="text-xs font-medium opacity-90 md:text-sm">Items</h3>
+          <p className="text-sm font-bold md:text-2xl">{items.length}</p>
+        </div>
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-3 md:p-6 text-white shadow-lg">
           <h3 className="text-xs md:text-sm font-medium opacity-90">Amount</h3>
           <p className="text-sm md:text-2xl font-bold">{formatCurrency(totalAmount)}</p>

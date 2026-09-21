@@ -108,7 +108,7 @@ export default function DonationsPage() {
 
   return (
     <div className="dashboard-detail-page space-y-6">
-        <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Donations (చంద) — {selectedYear}</h1>
+        <h1 className="px-4 pt-5 text-xl font-bold text-slate-100 sm:px-0 sm:pt-0">Donations (విరాళాలు) — {selectedYear}</h1>
       
       <Donations
         items={donationItems}

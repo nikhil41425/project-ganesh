@@ -55,10 +55,10 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   }, [auctionItems, donationItems, membershipItems, spentItems])
 
   const summaryRows = [
-    { label: 'Membership', entries: `${membershipItems.length} people`, total: sumField(membershipItems, 'amount'), paid: sumField(membershipItems, 'paid'), due: sumField(membershipItems, 'due'), route: '/dashboard/membership' },
-    { label: 'Expenses', entries: `${spentItems.length} items`, total: dashboard.expenseTotal, paid: dashboard.expensePaid, due: dashboard.expenseDue, route: '/dashboard/expenses' },
+    { label: 'Members (సభ్యులు)', entries: `${membershipItems.length} people`, total: sumField(membershipItems, 'amount'), paid: sumField(membershipItems, 'paid'), due: sumField(membershipItems, 'due'), route: '/dashboard/membership' },
+    { label: 'Expenses (ఖర్చులు)', entries: `${spentItems.length} items`, total: dashboard.expenseTotal, paid: dashboard.expensePaid, due: dashboard.expenseDue, route: '/dashboard/expenses' },
     { label: 'Auction', entries: `${auctionItems.length} items`, total: sumField(auctionItems, 'amount'), paid: sumField(auctionItems, 'paid'), due: sumField(auctionItems, 'due'), route: '/dashboard/auction' },
-    { label: 'Donations', entries: `${donationItems.length} people`, total: sumField(donationItems, 'amount'), paid: sumField(donationItems, 'paid'), due: sumField(donationItems, 'due'), route: '/dashboard/donations' },
+    { label: 'Donations (విరాళాలు)', entries: `${donationItems.length} people`, total: sumField(donationItems, 'amount'), paid: sumField(donationItems, 'paid'), due: sumField(donationItems, 'due'), route: '/dashboard/donations' },
   ]
 
   const totalStatuses = dashboard.incomingItems.length
@@ -111,7 +111,7 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
   return (
     <section className="min-h-[calc(100dvh-4rem)] bg-[#071b25] px-4 py-5 text-slate-100 sm:min-h-0 sm:rounded-3xl sm:p-7 sm:shadow-2xl lg:p-10">
       <div className="mb-5 sm:mb-7">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-emerald-300">Dashboard · {year}</p>
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-emerald-300">Home (హోమ్) · {year}</p>
         <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">Overview</h1>
         <p className="mt-2 text-sm text-slate-400">Payment status across contributions, donations, auction, and expenses</p>
       </div>
@@ -179,7 +179,7 @@ export default function Analytics({ auctionItems, membershipItems, spentItems, d
         </article>
 
         <article className="overflow-hidden rounded-2xl border border-slate-600/60 bg-[#102a36] shadow-xl">
-          <div className="flex flex-col gap-1 border-b border-slate-600/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between"><h2 className="text-xl font-bold">Summary</h2><span className="text-xs text-slate-400">Membership · Expenses · Auction · Donations</span></div>
+          <div className="flex flex-col gap-1 border-b border-slate-600/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between"><h2 className="text-xl font-bold">Summary</h2><span className="text-xs text-slate-400">సభ్యులు · ఖర్చులు · వేలం · విరాళాలు</span></div>
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-left">
               <thead className="bg-[#173642] text-xs uppercase tracking-wider text-slate-400"><tr><th className="px-5 py-4">Section</th><th className="px-5 py-4">Entries</th><th className="px-5 py-4">Total</th><th className="px-5 py-4">Paid</th><th className="px-5 py-4">Due</th><th className="px-5 py-4"><span className="sr-only">Open</span></th></tr></thead>

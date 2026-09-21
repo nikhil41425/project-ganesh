@@ -66,7 +66,7 @@ export const exportAnalyticsToPDF = async (source: ExportData) => {
   )
 
   const categories = [
-    { name: 'Membership', items: membershipItems, unit: 'people' },
+    { name: 'Members', items: membershipItems, unit: 'people' },
     { name: 'Expenses', items: spentItems, unit: 'items' },
     { name: 'Auction', items: auctionItems, unit: 'items' },
     { name: 'Donations', items: donationItems, unit: 'people' },

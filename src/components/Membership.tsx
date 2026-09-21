@@ -154,7 +154,7 @@ export default function Membership({
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-2 md:gap-4">
         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-2 md:p-6 text-white shadow-lg">
-          <h3 className="text-xs md:text-sm font-medium opacity-90">Members</h3>
+          <h3 className="text-xs md:text-sm font-medium opacity-90">Members (సభ్యులు)</h3>
           <p className="text-sm md:text-2xl font-bold">{totalMembers}</p>
         </div>
         <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-2 md:p-6 text-white shadow-lg">
@@ -172,7 +172,7 @@ export default function Membership({
       </div>
 
       <ManagementToolbar
-        title="Membership"
+        title="Members (సభ్యులు)"
         description="Find members, check payment status, or add a new community member."
         itemCount={visibleItems.length}
         itemLabel={visibleItems.length === 1 ? 'member' : 'members'}

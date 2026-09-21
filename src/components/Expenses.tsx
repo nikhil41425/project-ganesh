@@ -154,7 +154,7 @@ export default function Expenses({
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-2 md:gap-4">
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-2 md:p-6 text-white shadow-lg">
-          <h3 className="text-xs md:text-sm font-medium opacity-90">Expenses</h3>
+          <h3 className="text-xs md:text-sm font-medium opacity-90">Expenses (ఖర్చులు)</h3>
           <p className="text-sm md:text-2xl font-bold">{totalExpenses}</p>
         </div>
         <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-xl p-2 md:p-6 text-white shadow-lg">
@@ -172,7 +172,7 @@ export default function Expenses({
       </div>
 
       <ManagementToolbar
-        title="Expenses"
+        title="Expenses (ఖర్చులు)"
         description="Search outgoing payments, review status, or record a new expense."
         itemCount={visibleItems.length}
         itemLabel={visibleItems.length === 1 ? 'expense' : 'expenses'}

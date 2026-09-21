@@ -11,7 +11,7 @@ interface HeaderProps { isAdmin: boolean; onLogout: () => void }
 
 const tabs = [
   { id: 'dashboard', name: 'Dashboard', shortName: 'Home', teluguName: 'హోమ్', href: '/dashboard', icon: Home },
-  { id: 'auction', name: 'Auction', shortName: 'Auction', teluguName: 'సవాల్', href: '/dashboard/auction', icon: Gavel },
+  { id: 'auction', name: 'Auction', shortName: 'Auction', teluguName: 'వేలం', href: '/dashboard/auction', icon: Gavel },
   { id: 'membership', name: 'Membership', shortName: 'Members', teluguName: 'సభ్యులు', href: '/dashboard/membership', icon: Users },
   { id: 'expenses', name: 'Expenses', shortName: 'Expenses', teluguName: 'ఖర్చులు', href: '/dashboard/expenses', icon: ReceiptText },
   { id: 'donations', name: 'Donations', shortName: 'Donations', teluguName: 'విరాళాలు', href: '/dashboard/donations', icon: Heart },
