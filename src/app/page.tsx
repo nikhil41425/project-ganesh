@@ -15,7 +15,7 @@ export default function Home() {
 
         <div className="text-center">
           <p className="auth-eyebrow">Friendz Youth Association</p>
-          <h1 id="welcome-heading" className="auth-title mt-3">Welcome to Choller</h1>
+          <h1 id="welcome-heading" className="auth-title mt-3">Welcome to Friendz Youth Association - Choller</h1>
           <p className="auth-description mx-auto mt-3 max-w-sm">Stay connected with your community and keep every activity in one trusted place.</p>
         </div>
 
