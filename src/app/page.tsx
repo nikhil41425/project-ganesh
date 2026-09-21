@@ -1,40 +1,41 @@
-import Link from "next/link";
 import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowRight, ShieldCheck, UsersRound } from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-                      <Image
-                        src="/icons/friendyouthlogo.png"
-                        alt="Friends Youth Logo"
-                        width={120}
-                        height={120}
-                        className="object-contain"
-                        priority
-                      />
-                    </div>
-          <h1 className="mb-2 text-2xl font-bold text-gray-900">Friendz Youth — Choller</h1>
-          <p className="mb-8 text-gray-600">Choose how you want to access the community dashboard.</p>
-          
-          <div className="space-y-4">
-            <Link
-              href="/dashboard"
-              className="block w-full rounded-lg bg-emerald-600 px-4 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
-            >
-              View Dashboard
-            </Link>
-            <Link
-              href="/auth/login"
-              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-center font-semibold text-gray-800 transition hover:border-gray-400 hover:bg-gray-50"
-            >
-              Admin Login
-            </Link>
-          </div>
+    <main className="auth-shell">
+      <div className="auth-glow auth-glow-left" aria-hidden="true" />
+      <div className="auth-glow auth-glow-right" aria-hidden="true" />
+
+      <section className="auth-card" aria-labelledby="welcome-heading">
+        <div className="auth-brand-mark">
+          <Image src="/icons/friendyouthlogo.png" alt="Friendz Youth Association" width={112} height={112} className="h-full w-full object-cover" priority />
         </div>
-      </div>
-    </div>
-  );
+
+        <div className="text-center">
+          <p className="auth-eyebrow">Friendz Youth Association</p>
+          <h1 id="welcome-heading" className="auth-title mt-3">Welcome to Choller</h1>
+          <p className="auth-description mx-auto mt-3 max-w-sm">Stay connected with your community and keep every activity in one trusted place.</p>
+        </div>
+
+        <div className="mt-8 space-y-3">
+          <Link href="/dashboard" className="auth-button auth-button-primary group">
+            <span className="flex items-center gap-2.5"><UsersRound aria-hidden="true" size={19} strokeWidth={2} />View dashboard</span>
+            <ArrowRight aria-hidden="true" size={19} className="transition-transform duration-200 group-hover:translate-x-1" />
+          </Link>
+          <Link href="/auth/login" className="auth-button auth-button-secondary group">
+            <span className="flex items-center gap-2.5"><ShieldCheck aria-hidden="true" size={19} strokeWidth={2} />Admin sign in</span>
+            <ArrowRight aria-hidden="true" size={19} className="text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-slate-300" />
+          </Link>
+        </div>
+
+        <p className="mt-7 flex items-center justify-center gap-2 text-center text-xs font-medium text-slate-500">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />Community dashboard is available
+        </p>
+      </section>
+
+      <p className="auth-footer">Friendz Youth · Choller</p>
+    </main>
+  )
 }

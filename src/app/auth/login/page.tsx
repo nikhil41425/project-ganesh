@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertCircle, ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { createClient } from '@/lib/supabase/client'
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
@@ -20,19 +21,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const [supabase] = useState(createClient)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<LoginForm>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
 
-  // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -41,8 +37,8 @@ export default function LoginPage() {
           router.replace('/dashboard')
           return
         }
-      } catch (error) {
-        console.error('Error checking auth:', error)
+      } catch (authError) {
+        console.error('Error checking auth:', authError)
       } finally {
         setChecking(false)
       }
@@ -51,40 +47,19 @@ export default function LoginPage() {
     checkAuth()
   }, [supabase, router])
 
-  // Prevent password saving by clearing form fields on page load and adding listeners
   useEffect(() => {
-    // Disable password managers
-    const disablePasswordManagers = () => {
-      const forms = document.querySelectorAll('form')
-      forms.forEach(form => {
-        form.setAttribute('autocomplete', 'off')
-      })
-      
-      const inputs = document.querySelectorAll('input[type="password"], input[type="email"]')
-      inputs.forEach(input => {
-        input.setAttribute('autocomplete', 'off')
-        input.setAttribute('data-lpignore', 'true')
-      })
-    }
+    const forms = document.querySelectorAll('form')
+    forms.forEach((form) => form.setAttribute('autocomplete', 'off'))
 
-    disablePasswordManagers()
+    const inputs = document.querySelectorAll('input[type="password"], input[type="email"]')
+    inputs.forEach((input) => {
+      input.setAttribute('autocomplete', 'off')
+      input.setAttribute('data-lpignore', 'true')
+    })
 
-    // Clear form on page unload
-    const handleBeforeUnload = () => {
-      reset()
-      const inputs = document.querySelectorAll('input')
-      inputs.forEach(input => {
-        if (input instanceof HTMLInputElement) {
-          input.value = ''
-        }
-      })
-    }
-
+    const handleBeforeUnload = () => reset()
     window.addEventListener('beforeunload', handleBeforeUnload)
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [reset])
 
   const onSubmit = async (data: LoginForm) => {
@@ -92,143 +67,99 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      })
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password })
 
-      if (error) {
-        setError(error.message)
-      } else {
-        // Clear the form immediately to prevent password saving
-        reset()
-        // Small delay before redirect to ensure form is cleared
-        setTimeout(() => {
-          router.push('/dashboard')
-          router.refresh()
-        }, 100)
+      if (signInError) {
+        setError(signInError.message)
+        return
       }
-    } catch (err) {
-      setError('An unexpected error occurred')
+
+      reset()
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  // Show loading while checking authentication
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-700 font-medium">Checking authentication...</p>
-          <p className="text-sm text-gray-500">Please wait</p>
+      <main className="auth-shell">
+        <div className="auth-status-card" role="status" aria-live="polite">
+          <span className="auth-spinner" aria-hidden="true" />
+          <p className="mt-5 text-base font-semibold text-white">Preparing your account</p>
+          <p className="mt-1 text-sm text-slate-400">This will only take a moment.</p>
         </div>
-      </div>
+      </main>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <p className="text-gray-700 font-medium">Signing you in...</p>
-            <p className="text-sm text-gray-500">Please wait</p>
+    <main className="auth-shell">
+      <div className="auth-glow auth-glow-left" aria-hidden="true" />
+      <div className="auth-glow auth-glow-right" aria-hidden="true" />
+
+      {loading ? (
+        <div className="auth-overlay" role="status" aria-live="polite">
+          <div className="auth-status-card">
+            <span className="auth-spinner" aria-hidden="true" />
+            <p className="mt-5 text-base font-semibold text-white">Signing you in</p>
+            <p className="mt-1 text-sm text-slate-400">Verifying your credentials…</p>
           </div>
         </div>
-      )}
+      ) : null}
 
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <Image
-              src="/icons/friendyouthlogo.png"
-              alt="Friends Youth Logo"
-              width={120}
-              height={120}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+      <section className="auth-card auth-card-login" aria-labelledby="login-heading">
+        <Link href="/" className="auth-back-link"><ArrowLeft aria-hidden="true" size={17} />Back</Link>
+
+        <div className="auth-brand-mark auth-brand-mark-small">
+          <Image src="/icons/friendyouthlogo.png" alt="Friendz Youth Association" width={88} height={88} className="h-full w-full object-cover" priority />
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
-          {/* Hidden dummy fields to trick browser password managers */}
-          <input type="text" name="dummy_username" style={{ display: 'none' }} autoComplete="off" />
-          <input type="password" name="dummy_password" style={{ display: 'none' }} autoComplete="off" />
-          
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              {...register('email')}
-              type="email"
-              id="email"
-              name="email"
-              autoComplete="off"
-              autoSave="off"
-              data-lpignore="true"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-500"
-              placeholder="Enter your email"
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-            )}
-          </div>
+        <div className="text-center">
+          <p className="auth-eyebrow">Administrator access</p>
+          <h1 id="login-heading" className="auth-title mt-2.5">Welcome back</h1>
+          <p className="auth-description mt-2">Sign in to manage the community dashboard.</p>
+        </div>
 
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5" autoComplete="off" noValidate>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              {...register('password')}
-              type="password"
-              id="password"
-              name="password"
-              autoComplete="new-password"
-              autoSave="off"
-              data-lpignore="true"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-500"
-              placeholder="Enter your password"
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <label htmlFor="email" className="auth-label">Email address</label>
+            <div className="auth-input-wrap">
+              <Mail className="auth-input-icon" aria-hidden="true" size={18} />
+              <input {...register('email')} type="email" id="email" autoComplete="off" autoCapitalize="none" spellCheck={false} data-lpignore="true" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined} className="auth-input" placeholder="name@example.com" />
             </div>
-          )}
+            {errors.email ? <p id="email-error" className="auth-field-error" role="alert">{errors.email.message}</p> : null}
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center space-x-2"
-          >
-            {loading && (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            )}
-            <span>{loading ? 'Signing in...' : 'Sign In'}</span>
+          <div>
+            <label htmlFor="password" className="auth-label">Password</label>
+            <div className="auth-input-wrap">
+              <LockKeyhole className="auth-input-icon" aria-hidden="true" size={18} />
+              <input {...register('password')} type={showPassword ? 'text' : 'password'} id="password" autoComplete="new-password" data-lpignore="true" aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'password-error' : undefined} className="auth-input auth-input-password" placeholder="Enter your password" />
+              <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="auth-password-toggle" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                {showPassword ? <EyeOff aria-hidden="true" size={19} /> : <Eye aria-hidden="true" size={19} />}
+              </button>
+            </div>
+            {errors.password ? <p id="password-error" className="auth-field-error" role="alert">{errors.password.message}</p> : null}
+          </div>
+
+          {error ? (
+            <div className="auth-alert" role="alert"><AlertCircle className="mt-0.5 shrink-0" aria-hidden="true" size={18} /><p>{error}</p></div>
+          ) : null}
+
+          <button type="submit" disabled={loading} className="auth-button auth-button-primary group">
+            <span>Sign in securely</span>
+            <ArrowRight aria-hidden="true" size={19} className="transition-transform duration-200 group-hover:translate-x-1" />
           </button>
         </form>
 
-        {/* <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign up
-            </Link>
-          </p>
-        </div> */}
-      </div>
-    </div>
+        <p className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-slate-500">
+          <ShieldCheck aria-hidden="true" size={15} className="text-emerald-400" />Secure administrator access
+        </p>
+      </section>
+    </main>
   )
 }
