@@ -45,9 +45,9 @@ export function PaymentStatusBadge({ item }: { item: PaymentRecord }) {
 
 export function PaymentStatusSelect({ value, onChange }: { value: PaymentStatusFilter; onChange: (value: PaymentStatusFilter) => void }) {
   return (
-    <label className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-600 shadow-sm">
-      <span className="whitespace-nowrap">Status</span>
-      <select value={value} onChange={(event) => onChange(event.target.value as PaymentStatusFilter)} className="bg-transparent text-sm font-bold text-gray-900 outline-none" aria-label="Filter and sort by payment status">
+    <label className="payment-status-select flex h-11 w-full min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-xl border border-slate-600 bg-white px-3 text-sm font-semibold text-slate-600 shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 sm:w-auto sm:px-3.5">
+      <span className="payment-status-label-text whitespace-nowrap">Status</span>
+      <select value={value} onChange={(event) => onChange(event.target.value as PaymentStatusFilter)} className="min-w-0 flex-1 bg-transparent text-sm font-bold text-slate-900 outline-none" aria-label="Filter and sort by payment status">
         <option value="all">All: due first</option>
         <option value="due">Due</option>
         <option value="partial">Partially paid</option>

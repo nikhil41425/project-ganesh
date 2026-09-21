@@ -4,9 +4,10 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Trash2, Edit2, Save, X, Plus, Search } from 'lucide-react'
+import { Trash2, Edit2, Save, X, Plus } from 'lucide-react'
 import { isEditEnabled, isDeleteEnabled } from '@/lib/config'
-import { filterAndSortByStatus, getStatusRowClass, PaymentStatusBadge, PaymentStatusSelect, type PaymentStatusFilter } from '@/components/PaymentStatus'
+import { filterAndSortByStatus, getStatusRowClass, PaymentStatusBadge, type PaymentStatusFilter } from '@/components/PaymentStatus'
+import ManagementToolbar from '@/components/ManagementToolbar'
 
 // Define types
 interface DonationItem {
@@ -165,34 +166,20 @@ export default function Donations({
         </div>
       </div>
 
-      {/* Header with Search and Add Button */}
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 border border-orange-100">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            Donations
-          </h2>
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search donations..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white input-visible shadow-sm"
-            />
-          </div>
-          <PaymentStatusSelect value={statusFilter} onChange={setStatusFilter} />
-          {canManage && <button
-            onClick={() => onShowAddForm(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-          >
-            <Plus size={16} />
-            Add Donation
-          </button>}
-          </div>
-        </div>
-      </div>
+      <ManagementToolbar
+        title="Donations"
+        description="Find donor contributions, review their status, or record a new donation."
+        itemCount={visibleItems.length}
+        itemLabel={visibleItems.length === 1 ? 'donation' : 'donations'}
+        searchTerm={searchTerm}
+        searchPlaceholder="Search donations..."
+        onSearchChange={onSearchChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        canManage={canManage}
+        addLabel="Add donation"
+        onAdd={() => onShowAddForm(true)}
+      />
 
       {/* Add Form */}
       {canManage && showAddForm && (

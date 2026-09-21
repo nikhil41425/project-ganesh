@@ -517,6 +517,14 @@ body {
 }
 
 @media (max-width: 639px) {
+  .dashboard-detail-page > div > .grid:first-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .dashboard-detail-page > div > .grid:first-child > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
   .dashboard-detail-page > div {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -534,6 +542,7 @@ body {
   }
 
   .dashboard-detail-page > div > .grid:first-child > div {
+    min-width: 0;
     padding: 0.75rem !important;
   }
 
@@ -544,6 +553,7 @@ body {
   .dashboard-detail-page > div > .grid:first-child p {
     margin-top: 0.2rem;
     font-size: 0.95rem !important;
+    overflow-wrap: anywhere;
   }
 
   /* Compact shared search/add toolbar on every management page. */
@@ -683,6 +693,27 @@ body {
 
   .dashboard-detail-page tbody:has(td[colspan]) td > div > div:first-child {
     display: none;
+  }
+}
+
+@media (max-width: 359px) {
+  .payment-status-label-text {
+    display: none;
+  }
+
+  .payment-status-select {
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+  }
+}
+
+@media (max-width: 319px) {
+  .management-toolbar-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .management-toolbar-controls > * {
+    grid-column: 1 / -1 !important;
   }
 }
 
